@@ -92,7 +92,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="HalfEdgeGeometry\Face.cs" />
+    <Compile Include="HalfEdgeGeometry\HalfEdge.cs" />
+    <Compile Include="HalfEdgeGeometry\Vertex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
