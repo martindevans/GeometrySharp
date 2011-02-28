@@ -1,0 +1,1 @@
+An XNA library providing constructive solid geometry operations
