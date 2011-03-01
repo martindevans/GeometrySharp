@@ -9,6 +9,7 @@ namespace GeometrySharp.HalfEdgeGeometry
 {
     public class Mesh
     {
+        #region fields
         public const float BUCKET_SIZE = 0.01f;
 
         public IEnumerable<HalfEdge> HalfEdges
@@ -18,26 +19,7 @@ namespace GeometrySharp.HalfEdgeGeometry
                 throw new NotImplementedException();
             }
         }
-
-        public IEnumerable<Face> Faces
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        ConcurrentDictionary<float, ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>> vertices = new ConcurrentDictionary<float, ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>>();
-        public IEnumerable<Vertex> Vertices
-        {
-            get
-            {
-                foreach (var xD in vertices.Values)
-                    foreach (var yD in xD.Values)
-                        foreach (var v in yD.Values)
-                            yield return v;
-            }
-        }
+        #endregion
 
         public Mesh()
             :this(a => new Vertex(a))
@@ -50,6 +32,19 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         }
 
+        #region vertices
+        ConcurrentDictionary<float, ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>> vertices = new ConcurrentDictionary<float, ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>>();
+        public IEnumerable<Vertex> Vertices
+        {
+            get
+            {
+                foreach (var xD in vertices.Values)
+                    foreach (var yD in xD.Values)
+                        foreach (var v in yD.Values)
+                            yield return v;
+            }
+        }
+
         public Vertex GetVertex(Vector3 pos)
         {
             float x = pos.X.Bucketise(BUCKET_SIZE);
@@ -60,6 +55,7 @@ namespace GeometrySharp.HalfEdgeGeometry
             var yD = xD.GetOrAdd(y, a => new ConcurrentDictionary<float, Vertex>());
             return yD.GetOrAdd(z, a => new Vertex(new Vector3(x, y, z)));
         }
+        #endregion
 
         public HalfEdge GetEdge(Vertex a, Vertex b, Face f, HalfEdge abNext)
         {
@@ -71,6 +67,17 @@ namespace GeometrySharp.HalfEdgeGeometry
             throw new NotImplementedException();
         }
 
+        ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>> faces = new ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>>();
+        public IEnumerable<Face> Faces
+        {
+            get
+            {
+                foreach (var set in faces.Values)
+                    foreach (var face in set.Keys)
+                        yield return face;
+            }
+        }
+
         public Face GetFace(params Vertex[] vertices)
         {
             return GetFace(vertices as IEnumerable<Vertex>);
@@ -78,7 +85,43 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public Face GetFace(IEnumerable<Vertex> vertices)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Check if this face already exists");
+            throw new NotImplementedException("Check if this face would conflict with an already existing face");
+
+            List<HalfEdge> edges = new List<HalfEdge>();
+            Face f = new Face();
+
+            Vertex first = null;
+            Vertex previous = null;
+            foreach (var v in vertices)
+            {
+                if (first == null)
+                    first = v;
+                else
+                    edges.Add(GetEdge(previous, v, f, null));
+
+                previous = v;
+            }
+
+            edges.Add(GetEdge(previous, first, f, null));
+
+            for (int i = 0; i < edges.Count; i++)
+            {
+                var next = edges[(i + 1) % edges.Count];
+
+                if (edges[i].Next != null && edges[i].Next != next)
+                    throw new InvalidOperationException("Cannot link edges, conflicting link already exists");
+
+                edges[i].Next = edges[(i + 1) % edges.Count];
+            }
+
+            foreach (var vertex in vertices)
+            {
+                var set = faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>());
+                set.AddOrUpdate(f, true, (a, b) => { throw new InvalidOperationException(); });
+            }
+
+            return f;
         }
     }
 }
