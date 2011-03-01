@@ -40,5 +40,10 @@ namespace GeometrySharp.HalfEdgeGeometry
                     yield return edge.Twin == null ? null : edge.Twin.Face;
             }
         }
+
+        public void Delete()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

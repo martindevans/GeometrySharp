@@ -92,11 +92,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConstructiveSolidGeometry\Primitives\IPrimitive.cs" />
+    <Compile Include="ConstructiveSolidGeometry\Primitives\Sphere.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="HalfEdgeGeometry\Face.cs" />
     <Compile Include="HalfEdgeGeometry\HalfEdge.cs" />
+    <Compile Include="HalfEdgeGeometry\Mesh.cs" />
+    <Compile Include="HalfEdgeGeometry\PrimitiveShapes.cs" />
     <Compile Include="HalfEdgeGeometry\Vertex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
