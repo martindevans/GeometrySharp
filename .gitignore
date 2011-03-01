@@ -1,2 +1,6 @@
 *.suo
 *.cache
+GeometrySharp/bin/*
+GeometrySharpUnitTests/bin/*
+GeometrySharpUnitTests/obj/*
+GeometrySharp/obj/*
