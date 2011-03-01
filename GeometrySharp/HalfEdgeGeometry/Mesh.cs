@@ -22,7 +22,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         #endregion
 
         public Mesh()
-            :this(a => new Vertex(a))
+            : this(a => new Vertex(a))
         {
 
         }
@@ -56,10 +56,51 @@ namespace GeometrySharp.HalfEdgeGeometry
             return yD.GetOrAdd(z, a => new Vertex(new Vector3(x, y, z)));
         }
         #endregion
-
+        Dictionary<Vertex, List<HalfEdge>> edges = new Dictionary<Vertex, List<HalfEdge>>();
         public HalfEdge GetEdge(Vertex a, Vertex b, Face f, HalfEdge abNext)
         {
-            throw new NotImplementedException();
+            List<HalfEdge> appropriateEdges;
+            if (edges.ContainsKey(b))
+            {
+                appropriateEdges = edges[b];
+            }
+            else
+            {
+                appropriateEdges = new List<HalfEdge>();
+                edges[b] = appropriateEdges;
+            }
+
+            var query = appropriateEdges.Where(x => x.Twin.End == a);
+            switch (query.Count())
+            {
+                case 0:
+                    {
+                        HalfEdge edge = new HalfEdge(this, null, true);
+                        HalfEdge twin = edge.Twin;
+                        edge.End = b;
+                        twin.End = a;
+                        edge.Face = f;
+                        edge.Next = abNext;
+                        return edge;
+                    }
+                case 1:
+                    {
+                        var edge = query.First();
+
+                        if (abNext != null && edge.Next != abNext && edge.Next != null)
+                            throw new ArgumentException("Edge already attached to edge " + edge.Next);
+
+                        if (f != null && edge.Face != f && edge.Face != null)
+                            throw new ArgumentException("Edge already attached to face " + edge.Face);
+
+                        edge.Face = f ?? edge.Face;
+                        edge.Next = abNext ?? edge.Next;
+                        return edge;
+                    }
+                default:
+                    throw new MeshMalformedException("More than one edge already exists between " + a + " and " + b);
+            }
+
         }
 
         public HalfEdge GetEdge(Vertex a, Vertex b, Face abf, HalfEdge abNext, Face baf, HalfEdge baNext)
@@ -85,8 +126,8 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public Face GetFace(IEnumerable<Vertex> vertices)
         {
-            throw new NotImplementedException("Check if this face already exists");
-            throw new NotImplementedException("Check if this face would conflict with an already existing face");
+            //throw new NotImplementedException("Check if this face already exists");
+            //throw new NotImplementedException("Check if this face would conflict with an already existing face");
 
             List<HalfEdge> edges = new List<HalfEdge>();
             Face f = new Face();

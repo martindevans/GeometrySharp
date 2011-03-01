@@ -19,7 +19,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         internal HalfEdge(Mesh m, HalfEdge twin, bool primary)
         {
             Mesh = m;
-            Twin = twin;
+            Twin = primary ? new HalfEdge(m, this, false) : twin;
             Primary = primary;
         }
 
