@@ -15,7 +15,7 @@ namespace GeometrySharpUnitTests
         public void ConstructTriangle()
         {
             Mesh m = new Mesh();
-
+            //oh hai
             var a = m.GetVertex(Vector3.Zero);
             var b = m.GetVertex(Vector3.Zero);
             var c = m.GetVertex(Vector3.Zero);

@@ -98,6 +98,7 @@
     <Compile Include="HalfEdgeGeometry\Face.cs" />
     <Compile Include="HalfEdgeGeometry\HalfEdge.cs" />
     <Compile Include="HalfEdgeGeometry\Mesh.cs" />
+    <Compile Include="HalfEdgeGeometry\MeshMalformedException.cs" />
     <Compile Include="HalfEdgeGeometry\PrimitiveShapes.cs" />
     <Compile Include="HalfEdgeGeometry\Vertex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
