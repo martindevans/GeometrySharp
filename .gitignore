@@ -4,3 +4,4 @@ GeometrySharp/bin/*
 GeometrySharpUnitTests/bin/*
 GeometrySharpUnitTests/obj/*
 GeometrySharp/obj/*
+/TestResults/*
