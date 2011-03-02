@@ -147,6 +147,25 @@ namespace GeometrySharpUnitTests
 
             m.GetEdge(a, b, bcd, m.GetEdge(b, c));
         }
+
+        [TestMethod]
+        public void GetEdgeAndCheckEverythingIsValid()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+            Face bcd = m.GetFace(c, b, d);
+
+            var ca = m.GetEdge(c, a);
+            var ba = m.GetEdge(b, a);
+
+            m.GetEdge(b, c, abc, ca, bcd, ba);
+        }
         #endregion
 
         #region faces

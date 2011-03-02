@@ -13,6 +13,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         public const float BUCKET_SIZE = 0.01f;
         #endregion
 
+        #region constructors
         public Mesh()
             : this(a => new Vertex(a))
         {
@@ -23,6 +24,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
 
         }
+        #endregion
 
         #region vertices
         ConcurrentDictionary<float, ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>> vertices = new ConcurrentDictionary<float, ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>>();
