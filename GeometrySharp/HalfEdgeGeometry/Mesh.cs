@@ -125,24 +125,27 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
-        public Face GetFace(params Vertex[] vertices)
-        {
-            return GetFace(vertices as IEnumerable<Vertex>);
-        }
-
         public Face GetFace(IEnumerable<Vertex> vertices)
         {
-            HashSet<Vertex> s = new HashSet<Vertex>();
-            foreach (var v in vertices)
-                if (!s.Add(v))
-                    throw new ArgumentException("Input set contains duplicate vertices");
+            return GetFace(vertices.ToArray());
+        }
 
-            if (s.Count < 3)
-                throw new ArgumentException("Face must have 3 or more vertices");
+        public Face GetFace(params Vertex[] vertices)
+        {
+            CheckGetFaceParameters(vertices);
 
-            //throw new NotImplementedException("Check if this face already exists");
-            //throw new NotImplementedException("Check if this face would conflict with an already existing face");
+            Face existingFace = FindExistingFaces(vertices);
+            if (existingFace != null)
+            {
+                CheckPotentiallyConflictingFace(vertices, existingFace);
+                return existingFace;
+            }
 
+            return CreateNewFace(vertices);
+        }
+
+        private Face CreateNewFace(Vertex[] vertices)
+        {
             List<HalfEdge> edges = new List<HalfEdge>();
             Face f = new Face();
 
@@ -170,6 +173,8 @@ namespace GeometrySharp.HalfEdgeGeometry
                 edges[i].Next = edges[(i + 1) % edges.Count];
             }
 
+            f.Edge = edges[0];
+
             foreach (var vertex in vertices)
             {
                 var set = faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>());
@@ -177,6 +182,56 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
 
             return f;
+        }
+
+        private static void CheckPotentiallyConflictingFace(Vertex[] vertices, Face existingFace)
+        {
+            var firstIndex = Array.IndexOf(vertices, existingFace.Vertices.First());
+            int iteration = 0;
+            foreach (var v in existingFace.Vertices)
+            {
+                if (v != vertices[(iteration + firstIndex) % vertices.Length])
+                    throw new InvalidOperationException("A conflicting face already exists");
+
+                iteration++;
+            }
+        }
+
+        private Face FindExistingFaces(IEnumerable<Vertex> vertices)
+        {
+            HashSet<Face> existingFaces = new HashSet<Face>();
+            bool firstCheck = true;
+            int iterations = 0;
+            foreach (var v in vertices)
+            {
+                var keys = faces.GetOrAdd(v, k => new ConcurrentDictionary<Face, bool>()).Keys;
+
+                if (iterations == 1)
+                    existingFaces.IntersectWith(keys);
+                else
+                {
+                    firstCheck = false;
+                    existingFaces.UnionWith(keys);
+                }
+
+                iterations++;
+            }
+
+            if (existingFaces.Count > 1)
+                throw new MeshMalformedException("Multiple faces connecting this set of vertices together");
+
+            return existingFaces.FirstOrDefault();
+        }
+
+        private static void CheckGetFaceParameters(IEnumerable<Vertex> vertices)
+        {
+            HashSet<Vertex> s = new HashSet<Vertex>();
+            foreach (var v in vertices)
+                if (!s.Add(v))
+                    throw new ArgumentException("Input set contains duplicate vertices");
+
+            if (s.Count < 3)
+                throw new ArgumentException("Face must have 3 or more vertices");
         }
     }
 }
