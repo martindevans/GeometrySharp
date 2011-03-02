@@ -137,6 +137,9 @@ namespace GeometrySharp.HalfEdgeGeometry
                 if (!s.Add(v))
                     throw new ArgumentException("Input set contains duplicate vertices");
 
+            if (s.Count < 3)
+                throw new ArgumentException("Face must have 3 or more vertices");
+
             //throw new NotImplementedException("Check if this face already exists");
             //throw new NotImplementedException("Check if this face would conflict with an already existing face");
 

@@ -116,7 +116,7 @@ namespace GeometrySharpUnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void GetFaceWithDuplicateVertices()
+        public void GetIllegalFaceWithDuplicateVertices()
         {
             Mesh m = new Mesh();
 
@@ -127,7 +127,7 @@ namespace GeometrySharpUnitTests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void GetFaceWithConflictingEdgeAlreadyInPlace()
+        public void GetIllegalFaceWithConflictingEdgeAlreadyInPlace()
         {
             Mesh m = new Mesh();
 
@@ -139,6 +139,33 @@ namespace GeometrySharpUnitTests
             var f = m.GetFace(a, b, c);
 
             var f2 = m.GetFace(a, b, d);
+        }
+
+        [TestMethod]
+        public void GetSameFaceTwice()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(0, 2, 0));
+            var c = m.GetVertex(new Vector3(0, 0, 3));
+
+            Face f1 = m.GetFace(a, b, c);
+            Face f2 = m.GetFace(a, b, c);
+
+            Assert.AreEqual(f1, f2);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void GetIllegalFaceWithOnlyTwoVertices()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(Vector3.Zero);
+            var b = m.GetVertex(Vector3.One);
+
+            Face f = m.GetFace(a, b);
         }
         #endregion
     }
