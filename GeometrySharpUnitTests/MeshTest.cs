@@ -166,6 +166,25 @@ namespace GeometrySharpUnitTests
 
             m.GetEdge(b, c, abc, ca, bcd, ba);
         }
+
+        [TestMethod]
+        public void GetEdgeBetweenTwoFaces()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+            Face bcd = m.GetFace(c, b, d);
+
+            HalfEdge ca = m.GetEdge(c, a);
+            HalfEdge bd = m.GetEdge(b, d);
+
+            m.GetEdge(b, c, abc, ca, bcd, bd);
+        }
         #endregion
 
         #region faces
