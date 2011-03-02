@@ -11,14 +11,6 @@ namespace GeometrySharp.HalfEdgeGeometry
     {
         #region fields
         public const float BUCKET_SIZE = 0.01f;
-
-        public IEnumerable<HalfEdge> HalfEdges
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
         #endregion
 
         public Mesh()
@@ -57,7 +49,16 @@ namespace GeometrySharp.HalfEdgeGeometry
         }
         #endregion
 
-        Dictionary<Vertex, List<HalfEdge>> edges = new Dictionary<Vertex, List<HalfEdge>>();
+        ConcurrentDictionary<Vertex, List<HalfEdge>> edges = new ConcurrentDictionary<Vertex, List<HalfEdge>>();
+        public IEnumerable<HalfEdge> HalfEdges
+        {
+            get
+            {
+                foreach (var l in edges.Values)
+                    foreach (var edge in l)
+                        yield return edge;
+            }
+        }
 
         public HalfEdge GetEdge(Vertex a, Vertex b)
         {
@@ -66,18 +67,9 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public HalfEdge GetEdge(Vertex a, Vertex b, Face f, HalfEdge abNext)
         {
-            List<HalfEdge> appropriateEdges;
-            if (edges.ContainsKey(b))
-            {
-                appropriateEdges = edges[b];
-            }
-            else
-            {
-                appropriateEdges = new List<HalfEdge>();
-                edges[b] = appropriateEdges;
-            }
+            List<HalfEdge> edgesEndingAtB = edges.GetOrAdd(b, k => new List<HalfEdge>());
 
-            var query = appropriateEdges.Where(x => x.Twin.End == a);
+            var query = edgesEndingAtB.Where(x => x.Twin.End == a);
             switch (query.Count())
             {
                 case 0:
@@ -88,6 +80,10 @@ namespace GeometrySharp.HalfEdgeGeometry
                         twin.End = a;
                         edge.Face = f;
                         edge.Next = abNext;
+
+                        edgesEndingAtB.Add(edge);
+                        edges.GetOrAdd(a, k => new List<HalfEdge>()).Add(twin);
+
                         return edge;
                     }
                 case 1:
@@ -114,6 +110,7 @@ namespace GeometrySharp.HalfEdgeGeometry
             throw new NotImplementedException();
         }
 
+        #region faces
         ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>> faces = new ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>>();
         public IEnumerable<Face> Faces
         {
@@ -134,7 +131,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             CheckGetFaceParameters(vertices);
 
-            Face existingFace = FindExistingFaces(vertices);
+            Face existingFace = FindExistingFace(vertices);
             if (existingFace != null)
             {
                 CheckPotentiallyConflictingFace(vertices, existingFace);
@@ -149,6 +146,41 @@ namespace GeometrySharp.HalfEdgeGeometry
             List<HalfEdge> edges = new List<HalfEdge>();
             Face f = new Face();
 
+            BuildEdgeList(vertices, edges, f);
+
+            ConnectEdges(edges);
+
+            f.Edge = edges[0];
+
+            foreach (var vertex in vertices)
+            {
+                var set = faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>());
+                set.AddOrUpdate(f, true, (a, b) => { throw new InvalidOperationException(); });
+            }
+
+            return f;
+        }
+
+        private static void ConnectEdges(List<HalfEdge> edges)
+        {
+            for (int i = 0; i < edges.Count; i++)
+            {
+                var next = edges[(i + 1) % edges.Count];
+
+                if (edges[i].Next != null && edges[i].Next != next)
+                    throw new InvalidOperationException("Cannot link edges, conflicting link already exists");
+            }
+
+            for (int i = 0; i < edges.Count; i++)
+            {
+                var next = edges[(i + 1) % edges.Count];
+
+                edges[i].Next = edges[(i + 1) % edges.Count];
+            }
+        }
+
+        private void BuildEdgeList(Vertex[] vertices, List<HalfEdge> edges, Face f)
+        {
             Vertex first = null;
             Vertex previous = null;
             foreach (var v in vertices)
@@ -162,26 +194,6 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
 
             edges.Add(GetEdge(previous, first, f, null));
-
-            for (int i = 0; i < edges.Count; i++)
-            {
-                var next = edges[(i + 1) % edges.Count];
-
-                if (edges[i].Next != null && edges[i].Next != next)
-                    throw new InvalidOperationException("Cannot link edges, conflicting link already exists");
-
-                edges[i].Next = edges[(i + 1) % edges.Count];
-            }
-
-            f.Edge = edges[0];
-
-            foreach (var vertex in vertices)
-            {
-                var set = faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>());
-                set.AddOrUpdate(f, true, (a, b) => { throw new InvalidOperationException(); });
-            }
-
-            return f;
         }
 
         private static void CheckPotentiallyConflictingFace(Vertex[] vertices, Face existingFace)
@@ -197,10 +209,9 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
-        private Face FindExistingFaces(IEnumerable<Vertex> vertices)
+        private Face FindExistingFace(IEnumerable<Vertex> vertices)
         {
             HashSet<Face> existingFaces = new HashSet<Face>();
-            bool firstCheck = true;
             int iterations = 0;
             foreach (var v in vertices)
             {
@@ -209,10 +220,7 @@ namespace GeometrySharp.HalfEdgeGeometry
                 if (iterations == 1)
                     existingFaces.IntersectWith(keys);
                 else
-                {
-                    firstCheck = false;
                     existingFaces.UnionWith(keys);
-                }
 
                 iterations++;
             }
@@ -233,5 +241,6 @@ namespace GeometrySharp.HalfEdgeGeometry
             if (s.Count < 3)
                 throw new ArgumentException("Face must have 3 or more vertices");
         }
+        #endregion
     }
 }
