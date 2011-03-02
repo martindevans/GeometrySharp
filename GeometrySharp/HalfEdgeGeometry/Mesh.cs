@@ -69,6 +69,11 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public HalfEdge GetEdge(Vertex a, Vertex b, Face f, HalfEdge abNext)
         {
+            return GetEdge(a, b, f, abNext, null, null);
+        }
+
+        public HalfEdge GetEdge(Vertex a, Vertex b, Face abf, HalfEdge abNext, Face baf, HalfEdge baNext)
+        {
             List<HalfEdge> edgesEndingAtB = edges.GetOrAdd(b, k => new List<HalfEdge>());
 
             var query = edgesEndingAtB.Where(x => x.Twin.End == a);
@@ -78,10 +83,15 @@ namespace GeometrySharp.HalfEdgeGeometry
                     {
                         HalfEdge edge = new HalfEdge(this, null, true);
                         HalfEdge twin = edge.Twin;
+
                         edge.End = b;
                         twin.End = a;
-                        edge.Face = f;
+
+                        edge.Face = abf;
+                        twin.Face = baf;
+
                         edge.Next = abNext;
+                        twin.Next = baNext;
 
                         edgesEndingAtB.Add(edge);
                         edges.GetOrAdd(a, k => new List<HalfEdge>()).Add(twin);
@@ -95,21 +105,25 @@ namespace GeometrySharp.HalfEdgeGeometry
                         if (abNext != null && edge.Next != abNext && edge.Next != null)
                             throw new ArgumentException("Edge already attached to edge " + edge.Next);
 
-                        if (f != null && edge.Face != f && edge.Face != null)
+                        if (baNext != null && edge.Twin.Next != baNext && edge.Twin.Next != null)
+                            throw new ArgumentException("Twin edge already attached to edge " + edge.Twin.Next);
+
+                        if (abf != null && edge.Face != abf && edge.Face != null)
                             throw new ArgumentException("Edge already attached to face " + edge.Face);
 
-                        edge.Face = f ?? edge.Face;
+                        if (baf != null && edge.Twin.Face != baf && edge.Twin.Face != null)
+                            throw new ArgumentException("Twin edge already attached to face " + edge.Twin.Face);
+
+                        edge.Face = abf ?? edge.Face;
                         edge.Next = abNext ?? edge.Next;
+
+                        edge.Twin.Face = baf ?? edge.Twin.Face;
+                        edge.Twin.Next = baNext ?? edge.Twin.Next;
                         return edge;
                     }
                 default:
                     throw new MeshMalformedException("More than one edge already exists between " + a + " and " + b);
             }
-        }
-
-        public HalfEdge GetEdge(Vertex a, Vertex b, Face abf, HalfEdge abNext, Face baf, HalfEdge baNext)
-        {
-            throw new NotImplementedException();
         }
 
         #region faces

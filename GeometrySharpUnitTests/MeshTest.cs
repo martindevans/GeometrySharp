@@ -159,12 +159,12 @@ namespace GeometrySharpUnitTests
             var d = m.GetVertex(new Vector3(4, 0, 0));
 
             Face abc = m.GetFace(a, b, c);
-            Face bcd = m.GetFace(c, b, d);
+            Face cbd = m.GetFace(c, b, d);
 
             var ca = m.GetEdge(c, a);
-            var ba = m.GetEdge(b, a);
+            var bd = m.GetEdge(b, d);
 
-            m.GetEdge(b, c, abc, ca, bcd, ba);
+            m.GetEdge(b, c, abc, ca, cbd, bd);
         }
 
         [TestMethod]
@@ -184,6 +184,21 @@ namespace GeometrySharpUnitTests
             HalfEdge bd = m.GetEdge(b, d);
 
             m.GetEdge(b, c, abc, ca, bcd, bd);
+        }
+
+        [TestMethod]
+        public void GetEdgeThenGetTwin()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(Vector3.Zero);
+            var b = m.GetVertex(Vector3.One);
+
+            var e1 = m.GetEdge(a, b);
+            var e2 = m.GetEdge(b, a);
+
+            Assert.AreEqual(e1, e2.Twin);
+            Assert.AreEqual(e1.Twin, e2);
         }
         #endregion
 
