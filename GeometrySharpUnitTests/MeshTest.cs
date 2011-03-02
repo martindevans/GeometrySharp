@@ -99,6 +99,54 @@ namespace GeometrySharpUnitTests
             Assert.AreEqual(e1, e2.Twin);
             Assert.AreEqual(e1.Twin, e2);
         }
+
+        [TestMethod]
+        public void GetEdgeAndCheckFaceAndNext()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+
+            m.GetEdge(a, b, abc, m.GetEdge(b, c));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void GetEdgeAndCheckFaceAndIncorrectNext()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+
+            m.GetEdge(a, b, abc, m.GetEdge(c, a));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void GetEdgeAndCheckIncorrectFaceAndNext()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+            Face bcd = m.GetFace(b, c, d);
+
+            m.GetEdge(a, b, bcd, m.GetEdge(b, c));
+        }
         #endregion
 
         #region faces
@@ -126,8 +174,8 @@ namespace GeometrySharpUnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetIllegalFaceWithConflictingEdgeAlreadyInPlace()
+        [ExpectedException(typeof(ArgumentException))]
+        public void GetIllegalFaceWithConflictingEdgeAlreadyInPlaceDueToWinding()
         {
             Mesh m = new Mesh();
 
@@ -137,7 +185,6 @@ namespace GeometrySharpUnitTests
             var d = m.GetVertex(Vector3.UnitZ);
 
             var f = m.GetFace(a, b, c);
-
             var f2 = m.GetFace(a, b, d);
         }
 
@@ -166,6 +213,20 @@ namespace GeometrySharpUnitTests
             var b = m.GetVertex(Vector3.One);
 
             Face f = m.GetFace(a, b);
+        }
+
+        [TestMethod]
+        public void CreateTwoBorderingFaces()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+            Face bcd = m.GetFace(c, b, d);
         }
         #endregion
     }

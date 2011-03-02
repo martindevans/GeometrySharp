@@ -218,9 +218,9 @@ namespace GeometrySharp.HalfEdgeGeometry
                 var keys = faces.GetOrAdd(v, k => new ConcurrentDictionary<Face, bool>()).Keys;
 
                 if (iterations == 1)
-                    existingFaces.IntersectWith(keys);
-                else
                     existingFaces.UnionWith(keys);
+                else
+                    existingFaces.IntersectWith(keys);
 
                 iterations++;
             }
