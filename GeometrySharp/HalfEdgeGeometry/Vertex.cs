@@ -14,5 +14,10 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             Position = position;
         }
+
+        public override string ToString()
+        {
+            return Position.ToString();
+        }
     }
 }
