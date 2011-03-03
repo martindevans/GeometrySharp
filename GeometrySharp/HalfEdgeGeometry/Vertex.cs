@@ -10,7 +10,7 @@ namespace GeometrySharp.HalfEdgeGeometry
     {
         public Vector3 Position;
 
-        public Vertex(Vector3 position)
+        protected internal Vertex(Vector3 position)
         {
             Position = position;
         }

@@ -41,9 +41,16 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
+        public readonly Mesh Mesh;
+
+        protected internal Face(Mesh m)
+        {
+            Mesh = m;
+        }
+
         public void Delete()
         {
-            throw new NotImplementedException();
+            Mesh.Delete(this);
         }
     }
 }

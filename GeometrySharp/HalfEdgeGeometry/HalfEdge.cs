@@ -16,7 +16,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         public readonly Mesh Mesh;
         internal readonly bool Primary;
 
-        internal HalfEdge(Mesh m, HalfEdge twin, bool primary)
+        protected internal HalfEdge(Mesh m, HalfEdge twin, bool primary)
         {
             Mesh = m;
             Twin = primary ? new HalfEdge(m, this, false) : twin;
@@ -36,6 +36,11 @@ namespace GeometrySharp.HalfEdgeGeometry
             Twin.Next = ab;
 
             return ab.Primary ? ab : ab.Twin;
+        }
+
+        public override string ToString()
+        {
+            return Twin.End.ToString() + " -> " + End.ToString();
         }
     }
 }

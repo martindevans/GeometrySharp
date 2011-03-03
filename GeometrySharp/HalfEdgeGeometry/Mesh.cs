@@ -51,6 +51,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         }
         #endregion
 
+        #region edges
         ConcurrentDictionary<Vertex, List<HalfEdge>> edges = new ConcurrentDictionary<Vertex, List<HalfEdge>>();
         public IEnumerable<HalfEdge> HalfEdges
         {
@@ -125,6 +126,7 @@ namespace GeometrySharp.HalfEdgeGeometry
                     throw new MeshMalformedException("More than one edge already exists between " + a + " and " + b);
             }
         }
+        #endregion
 
         #region faces
         ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>> faces = new ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>>();
@@ -132,9 +134,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             get
             {
-                foreach (var set in faces.Values)
-                    foreach (var face in set.Keys)
-                        yield return face;
+                return faces.SelectMany(a => a.Value.Keys).GroupBy(a => a).Select(a => a.First());
             }
         }
 
@@ -160,7 +160,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         private Face CreateNewFace(Vertex[] vertices)
         {
             List<HalfEdge> edges = new List<HalfEdge>();
-            Face f = new Face();
+            Face f = new Face(this);
 
             BuildEdgeList(vertices, edges, f);
 
@@ -256,6 +256,11 @@ namespace GeometrySharp.HalfEdgeGeometry
 
             if (s.Count < 3)
                 throw new ArgumentException("Face must have 3 or more vertices");
+        }
+
+        public static void Delete(Face f)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }

@@ -282,5 +282,65 @@ namespace GeometrySharpUnitTests
             Face bcd = m.GetFace(c, b, d);
         }
         #endregion
+
+        #region enumerators
+        [TestMethod]
+        public void FacesEnumeratorReturnsCorrectFacesAndCount()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+            Face bcd = m.GetFace(c, b, d);
+
+            Assert.AreEqual(2, m.Faces.Count());
+
+            Assert.IsTrue(m.Faces.Contains(abc));
+            Assert.IsTrue(m.Faces.Contains(bcd));
+        }
+
+        [TestMethod]
+        public void EdgesEnumeratorReturnsCorrectEdgesAndCount()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+
+            Assert.AreEqual(6, m.HalfEdges.Count());
+
+            Assert.IsTrue(m.HalfEdges.Contains(abc.Edges.Skip(0).First()));
+            Assert.IsTrue(m.HalfEdges.Contains(abc.Edges.Skip(0).First().Twin));
+            Assert.IsTrue(m.HalfEdges.Contains(abc.Edges.Skip(1).First()));
+            Assert.IsTrue(m.HalfEdges.Contains(abc.Edges.Skip(1).First().Twin));
+            Assert.IsTrue(m.HalfEdges.Contains(abc.Edges.Skip(2).First()));
+            Assert.IsTrue(m.HalfEdges.Contains(abc.Edges.Skip(2).First().Twin));
+        }
+
+        [TestMethod]
+        public void VerticesEnumeratorReturnsCorrectVerticesAndCount()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+
+            Assert.AreEqual(3, m.Vertices.Count());
+
+            Assert.IsTrue(m.Vertices.Contains(a));
+            Assert.IsTrue(m.Vertices.Contains(b));
+            Assert.IsTrue(m.Vertices.Contains(c));
+        }
+        #endregion
     }
 }
