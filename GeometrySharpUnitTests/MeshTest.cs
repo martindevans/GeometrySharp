@@ -297,6 +297,30 @@ namespace GeometrySharpUnitTests
             Face abc = m.GetFace(a, b, c);
             Face bcd = m.GetFace(c, b, d);
         }
+
+        [TestMethod]
+        public void DeleteFace()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0));
+            var b = m.GetVertex(new Vector3(2, 0, 0));
+            var c = m.GetVertex(new Vector3(3, 0, 0));
+            var d = m.GetVertex(new Vector3(4, 0, 0));
+
+            Face abc = m.GetFace(a, b, c);
+            Face bcd = m.GetFace(c, b, d);
+
+            List<HalfEdge> edges = bcd.Edges.ToList();
+
+            bcd.Delete();
+
+            foreach (var edge in edges)
+            {
+                Assert.IsNull(edge.Face);
+                Assert.IsNull(edge.Next);
+            }
+        }
         #endregion
 
         #region enumerators

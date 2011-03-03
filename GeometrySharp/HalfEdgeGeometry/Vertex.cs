@@ -15,7 +15,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             get
             {
-                throw new NotImplementedException();
+                return Mesh.VertexIncoming(this);
             }
         }
 

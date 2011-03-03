@@ -92,49 +92,6 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// <returns></returns>
         public static Mesh SubdivideInvertedFace(Mesh m)
         {
-            var edges = new HashSet<HalfEdge>(m.HalfEdges.Where(a => a.Primary));
-            foreach (var edge in edges)
-                edge.Split(edge.End.Position * 0.5f + edge.Twin.End.Position * 0.5f);
-
-            var faces = m.Faces.ToArray();
-            List<HalfEdge> faceEdgesNewVertices = new List<HalfEdge>();
-            Queue<Vertex> outerTriangles = new Queue<Vertex>();
-            foreach (var face in faces)
-            {
-                faceEdgesNewVertices.Clear();
-                outerTriangles.Clear();
-
-                //when edges are split, the original edge is left pointing at the new vertex inserted in the middle
-                //build a list of all the original edges in this face, which means the end vertices of these edges are the new vertices
-                foreach (var edge in face.Edges)
-                {
-                    if (edges.Contains(edge)) //this edge ends in a new vertex
-                        faceEdgesNewVertices.Add(edge);
-                    else //this edge ends in an old vertex, find the next and previous vertex and queue them up to become a triangle
-                    {
-                        outerTriangles.Enqueue(edge.End);
-                        outerTriangles.Enqueue(edge.Next.End);
-                        outerTriangles.Enqueue(edge.Twin.End);
-                    }
-                }
-
-                if (outerTriangles.Count % 3 != 0)
-                    throw new InvalidOperationException("Queue length not divisible by three, not possible to construct triangles from this!");
-
-                face.Delete();
-
-                var central = m.GetFace(faceEdgesNewVertices.Select(e => e.End));
-
-                while (outerTriangles.Count > 0)
-                {
-                    var a = outerTriangles.Dequeue();
-                    var b = outerTriangles.Dequeue();
-                    var c = outerTriangles.Dequeue();
-
-                    m.GetFace(a, b, c);
-                }
-            }
-
             throw new NotImplementedException();
         }
 

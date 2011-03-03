@@ -58,5 +58,11 @@ namespace GeometrySharpUnitTests
             Assert.AreEqual(12, m.Vertices.Count());
             Assert.AreEqual(20, m.Faces.Count());
         }
+
+        [TestMethod]
+        public void Sphere1()
+        {
+            Mesh m = PrimitiveShapes.Sphere(1);
+        }
     }
 }

@@ -45,6 +45,11 @@ namespace GeometrySharp.HalfEdgeGeometry
             var yD = xD.GetOrAdd(y, a => new ConcurrentDictionary<float, Vertex>());
             return yD.GetOrAdd(z, a => vertexFactory(new Vector3(x, y, z), name, this));
         }
+
+        internal IEnumerable<HalfEdge> VertexIncoming(Vertex vertex)
+        {
+            return edges.GetOrAdd(vertex, a => new List<HalfEdge>());
+        }
         #endregion
 
         #region edges
@@ -78,7 +83,7 @@ namespace GeometrySharp.HalfEdgeGeometry
             {
                 case 0:
                     {
-                        HalfEdge edge = new HalfEdge(this, null, true);
+                        HalfEdge edge = new HalfEdge(this);
                         HalfEdge twin = edge.Twin;
 
                         edge.End = b;
@@ -254,9 +259,27 @@ namespace GeometrySharp.HalfEdgeGeometry
                 throw new ArgumentException("Face must have 3 or more vertices");
         }
 
-        public static void Delete(Face f)
+        public void Delete(Face f)
         {
-            throw new NotImplementedException();
+            foreach (var vertex in f.Vertices)
+            {
+                bool b;
+                if (!faces[vertex].TryRemove(f, out b))
+                    throw new MeshMalformedException("Face was not indexed with an associated vertex");
+            }
+
+            HalfEdge previous = null;
+            foreach (var edge in f.Edges)
+            {
+                if (previous != null)
+                    previous.Next = null;
+                previous = edge;
+
+                edge.Face = null;
+            }
+
+            if (previous != null)
+                previous.Next = null;
         }
         #endregion
     }

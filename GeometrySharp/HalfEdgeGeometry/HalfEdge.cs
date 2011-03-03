@@ -16,11 +16,18 @@ namespace GeometrySharp.HalfEdgeGeometry
         public readonly Mesh Mesh;
         internal readonly bool Primary;
 
-        protected internal HalfEdge(Mesh m, HalfEdge twin, bool primary)
+        protected internal HalfEdge(Mesh m)
         {
             Mesh = m;
-            Twin = primary ? new HalfEdge(m, this, false) : twin;
-            Primary = primary;
+            Twin = new HalfEdge(m, this);
+            Primary = true;
+        }
+
+        private HalfEdge(Mesh m, HalfEdge twin)
+        {
+            Mesh = m;
+            Twin = twin;
+            Primary = false;
         }
 
         public HalfEdge Split(Vector3 midpoint)
