@@ -242,6 +242,22 @@ namespace GeometrySharpUnitTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void GetIllegalFaceDueToVerticesAlreadyInUse()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(Vector3.Zero);
+            var b = m.GetVertex(Vector3.UnitX);
+            var c = m.GetVertex(Vector3.UnitY);
+            var d = m.GetVertex(Vector3.UnitZ);
+
+            var f = m.GetFace(a, b, c, d);
+
+            var f2 = m.GetFace(a, b, c);
+        }
+
+        [TestMethod]
         public void GetSameFaceTwice()
         {
             Mesh m = new Mesh();

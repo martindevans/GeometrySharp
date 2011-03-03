@@ -44,13 +44,13 @@ namespace GeometrySharp.HalfEdgeGeometry
                 8, 10, 3,
                 9, 11, 0};
 
-        private static readonly Func<Vector3, Vertex> defaultFactory = a => new Vertex(a);
+        private static readonly Func<Vector3, string, Mesh, Vertex> defaultFactory = (a, b, c) => new Vertex(a, b, c);
 
-        public static Mesh Icosahedron(Func<Vector3, Vertex> factory = null)
+        public static Mesh Icosahedron(Func<Vector3, string, Mesh, Vertex> factory = null)
         {
             Mesh m = new Mesh(factory ?? defaultFactory);
 
-            var vertices = icosahedronVertices.Select(a => m.GetVertex(a)).ToArray();
+            var vertices = icosahedronVertices.Select((a, i) => m.GetVertex(a, i.ToString())).ToArray();
 
             for (int i = 0; i < icosahedronIndices.Length; i += 3)
             {
@@ -65,7 +65,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         }
         #endregion
 
-        public static Mesh Sphere(int subdivisions, Func<Vector3, Vertex> factory = null)
+        public static Mesh Sphere(int subdivisions, Func<Vector3, string, Mesh, Vertex> factory = null)
         {
             Mesh m = Icosahedron(factory ?? defaultFactory);
 
@@ -138,7 +138,20 @@ namespace GeometrySharp.HalfEdgeGeometry
             throw new NotImplementedException();
         }
 
-        public static Mesh Cuboid(Vector3 top1, Vector3 top2, Vector3 top3, Vector3 top4, Vector3 bottom1, Vector3 bottom2, Vector3 bottom3, Vector3 bottom4, Func<Vector3, Vertex> factory = null)
+        /// <summary>
+        /// Construct a cuboid graph on the given vertices, winding around { top1, top2, top3, top4 } and then all neighbours accordingly
+        /// </summary>
+        /// <param name="top1"></param>
+        /// <param name="top2"></param>
+        /// <param name="top3"></param>
+        /// <param name="top4"></param>
+        /// <param name="bottom1"></param>
+        /// <param name="bottom2"></param>
+        /// <param name="bottom3"></param>
+        /// <param name="bottom4"></param>
+        /// <param name="factory"></param>
+        /// <returns></returns>
+        public static Mesh Cuboid(Vector3 top1, Vector3 top2, Vector3 top3, Vector3 top4, Vector3 bottom1, Vector3 bottom2, Vector3 bottom3, Vector3 bottom4, Func<Vector3, string, Mesh, Vertex> factory = null)
         {
             Mesh m = new Mesh(factory ?? defaultFactory);
 

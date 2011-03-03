@@ -14,15 +14,9 @@ namespace GeometrySharp.HalfEdgeGeometry
         #endregion
 
         #region constructors
-        public Mesh()
-            : this(a => new Vertex(a))
+        public Mesh(Func<Vector3, string, Mesh, Vertex> vertexFactory = null)
         {
-
-        }
-
-        public Mesh(Func<Vector3, Vertex> vertexFactory)
-        {
-
+            this.vertexFactory = vertexFactory ?? ((a, b, c) => new Vertex(a, b, c));
         }
         #endregion
 
@@ -39,7 +33,9 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
-        public Vertex GetVertex(Vector3 pos)
+        private readonly Func<Vector3, string, Mesh, Vertex> vertexFactory;
+
+        public Vertex GetVertex(Vector3 pos, String name = "")
         {
             float x = pos.X.Bucketise(BUCKET_SIZE);
             float y = pos.Y.Bucketise(BUCKET_SIZE);
@@ -47,7 +43,7 @@ namespace GeometrySharp.HalfEdgeGeometry
 
             var xD = vertices.GetOrAdd(x, a => new ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>());
             var yD = xD.GetOrAdd(y, a => new ConcurrentDictionary<float, Vertex>());
-            return yD.GetOrAdd(z, a => new Vertex(new Vector3(x, y, z)));
+            return yD.GetOrAdd(z, a => vertexFactory(new Vector3(x, y, z), name, this));
         }
         #endregion
 
@@ -233,7 +229,7 @@ namespace GeometrySharp.HalfEdgeGeometry
             {
                 var keys = faces.GetOrAdd(v, k => new ConcurrentDictionary<Face, bool>()).Keys;
 
-                if (iterations == 1)
+                if (iterations == 0)
                     existingFaces.UnionWith(keys);
                 else
                     existingFaces.IntersectWith(keys);

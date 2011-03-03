@@ -11,6 +11,7 @@ namespace GeometrySharpUnitTests
     [TestClass]
     public class PrimitiveShapesTest
     {
+        #region cuboid
         [TestMethod]
         public void Cuboid()
         {
@@ -27,8 +28,35 @@ namespace GeometrySharpUnitTests
             Assert.AreEqual(8, m.Vertices.Count());
             Assert.AreEqual(24, m.HalfEdges.Count());
             Assert.AreEqual(6, m.Faces.Count());
+        }
 
-            //throw new NotImplementedException("Walk shape and check it is correct");
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void DegenerateCuboid()
+        {
+            Mesh m = PrimitiveShapes.Cuboid(
+                new Vector3(0, 0, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(0, 0, 0));
+
+            Assert.AreEqual(8, m.Vertices.Count());
+            Assert.AreEqual(24, m.HalfEdges.Count());
+            Assert.AreEqual(6, m.Faces.Count());
+        }
+        #endregion
+
+        [TestMethod]
+        public void Icosahedron()
+        {
+            Mesh m = PrimitiveShapes.Icosahedron();
+
+            Assert.AreEqual(12, m.Vertices.Count());
+            Assert.AreEqual(20, m.Faces.Count());
         }
     }
 }
