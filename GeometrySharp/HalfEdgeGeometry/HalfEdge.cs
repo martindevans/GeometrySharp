@@ -30,19 +30,9 @@ namespace GeometrySharp.HalfEdgeGeometry
             Primary = false;
         }
 
-        public HalfEdge Split(Vector3 midpoint)
+        public HalfEdge Split(Vertex midpoint)
         {
-            var a = Twin.End;
-            var b = Mesh.GetVertex(midpoint);
-            var c = End;
-
-            Twin.End = b;
-
-            var ab = Mesh.GetEdge(a, b, Face, this, Twin.Face, Twin.Next);
-
-            Twin.Next = ab;
-
-            return ab.Primary ? ab : ab.Twin;
+            throw new NotImplementedException();
         }
 
         public override string ToString()
