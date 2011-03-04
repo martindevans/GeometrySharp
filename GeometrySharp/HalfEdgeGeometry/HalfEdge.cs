@@ -8,7 +8,19 @@ namespace GeometrySharp.HalfEdgeGeometry
 {
     public class HalfEdge
     {
-        public Vertex End;
+        private Vertex end;
+        public Vertex End
+        {
+            get
+            {
+                return end;
+            }
+            set
+            {
+                Mesh.UpdateIndex(this, value);
+                end = value;
+            }
+        }
         public readonly HalfEdge Twin;
         public HalfEdge Next;
         public Face Face;
@@ -32,7 +44,27 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public HalfEdge Split(Vertex midpoint)
         {
-            throw new NotImplementedException();
+            var a = Twin.End;
+            var m = midpoint;
+            var b = End;
+
+            Twin.End = m;
+            var bm = Twin;
+            var mb = this;
+
+            var am = Mesh.GetEdge(a, m, Face, Face == null ? null : mb, mb.Twin.Face, mb.Twin.Next);
+            var ma = am.Twin;
+
+            if (Face != null)
+            {
+                bm.Next = ma;
+                Face.Edges.Where(e => e.Next == this).First().Next = am;
+            }
+
+            if (Twin.Face != null)
+                Twin.Face.Edges.Where(e => e.Next == Twin).First().Next = bm;
+
+            return am;
         }
 
         public override string ToString()

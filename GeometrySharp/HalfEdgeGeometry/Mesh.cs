@@ -48,12 +48,12 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         internal IEnumerable<HalfEdge> VertexIncoming(Vertex vertex)
         {
-            return edges.GetOrAdd(vertex, a => new List<HalfEdge>());
+            return edges.GetOrAdd(vertex, a => new HashSet<HalfEdge>());
         }
         #endregion
 
         #region edges
-        ConcurrentDictionary<Vertex, List<HalfEdge>> edges = new ConcurrentDictionary<Vertex, List<HalfEdge>>();
+        ConcurrentDictionary<Vertex, HashSet<HalfEdge>> edges = new ConcurrentDictionary<Vertex, HashSet<HalfEdge>>();
         public IEnumerable<HalfEdge> HalfEdges
         {
             get
@@ -76,7 +76,7 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public HalfEdge GetEdge(Vertex a, Vertex b, Face abf, HalfEdge abNext, Face baf, HalfEdge baNext)
         {
-            List<HalfEdge> edgesEndingAtB = edges.GetOrAdd(b, k => new List<HalfEdge>());
+            HashSet<HalfEdge> edgesEndingAtB = edges.GetOrAdd(b, k => new HashSet<HalfEdge>());
 
             var query = edgesEndingAtB.Where(x => x.Twin.End == a);
             switch (query.Count())
@@ -94,9 +94,6 @@ namespace GeometrySharp.HalfEdgeGeometry
 
                         edge.Next = abNext;
                         twin.Next = baNext;
-
-                        edgesEndingAtB.Add(edge);
-                        edges.GetOrAdd(a, k => new List<HalfEdge>()).Add(twin);
 
                         return edge;
                     }
@@ -126,6 +123,17 @@ namespace GeometrySharp.HalfEdgeGeometry
                 default:
                     throw new MeshMalformedException("More than one edge already exists between " + a + " and " + b);
             }
+        }
+
+        internal void UpdateIndex(HalfEdge halfEdge, Vertex newEndValue)
+        {
+            if (newEndValue == null)
+                throw new ArgumentException("Cannot set end to null");
+
+            if (halfEdge.End != null)
+                edges.GetOrAdd(halfEdge.End, a => new HashSet<HalfEdge>()).Remove(halfEdge);
+
+            edges.GetOrAdd(newEndValue, a => new HashSet<HalfEdge>()).Add(halfEdge);
         }
         #endregion
 

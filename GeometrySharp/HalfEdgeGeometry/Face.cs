@@ -36,8 +36,8 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             get
             {
-                foreach (var edge in Edges)
-                    yield return edge.Twin == null ? null : edge.Twin.Face;
+                foreach (var f in Edges.Select(e => e.Twin.Face).Where(f => f != null).Distinct())
+                    yield return f;
             }
         }
 
