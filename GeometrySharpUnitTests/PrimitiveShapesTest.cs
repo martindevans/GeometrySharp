@@ -67,9 +67,9 @@ namespace GeometrySharpUnitTests
         }
 
         [TestMethod]
-        public void Sphere1()
+        public void MidpointSphere1()
         {
-            Mesh m = PrimitiveShapes.Sphere(1);
+            Mesh m = PrimitiveShapes.Sphere(1, subdivisionOperation: Mesh.SubdivideOperation.Midpoint);
 
             foreach (var e in m.HalfEdges)
             {
@@ -82,9 +82,9 @@ namespace GeometrySharpUnitTests
         }
 
         [TestMethod]
-        public void Sphere2()
+        public void MidpointSphere2()
         {
-            Mesh m = PrimitiveShapes.Sphere(2);
+            Mesh m = PrimitiveShapes.Sphere(2, subdivisionOperation: Mesh.SubdivideOperation.Midpoint);
 
             foreach (var e in m.HalfEdges)
             {
@@ -97,9 +97,54 @@ namespace GeometrySharpUnitTests
         }
 
         [TestMethod]
-        public void Sphere3()
+        public void MidpointSphere3()
         {
-            Mesh m = PrimitiveShapes.Sphere(3);
+            Mesh m = PrimitiveShapes.Sphere(3, subdivisionOperation: Mesh.SubdivideOperation.Midpoint);
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
+
+            Assert.AreEqual(272, m.Vertices.Count());
+            Assert.AreEqual(540, m.Faces.Count());
+        }
+
+        [TestMethod]
+        public void InternalFaceSphere1()
+        {
+            Mesh m = PrimitiveShapes.Sphere(1, subdivisionOperation: Mesh.SubdivideOperation.InternalFace);
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
+
+            Assert.AreEqual(32, m.Vertices.Count());
+            Assert.AreEqual(60, m.Faces.Count());
+        }
+
+        [TestMethod]
+        public void InternalFaceSphere2()
+        {
+            Mesh m = PrimitiveShapes.Sphere(2, subdivisionOperation: Mesh.SubdivideOperation.InternalFace);
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
+
+            Assert.AreEqual(92, m.Vertices.Count());
+            Assert.AreEqual(180, m.Faces.Count());
+        }
+
+        [TestMethod]
+        public void InternalFaceSphere3()
+        {
+            Mesh m = PrimitiveShapes.Sphere(3, subdivisionOperation: Mesh.SubdivideOperation.InternalFace);
 
             foreach (var e in m.HalfEdges)
             {

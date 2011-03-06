@@ -65,52 +65,17 @@ namespace GeometrySharp.HalfEdgeGeometry
         }
         #endregion
 
-        public static Mesh Sphere(int subdivisions, Func<Vector3, string, Mesh, Vertex> factory = null)
+        public static Mesh Sphere(int subdivisions, Func<Vector3, string, Mesh, Vertex> factory = null, Mesh.SubdivideOperation subdivisionOperation = Mesh.SubdivideOperation.InternalFace)
         {
             Mesh m = Icosahedron(factory ?? defaultFactory);
 
             for (int i = 0; i < subdivisions; i++)
-                m = SubdivideInvertedFace(m);
+                m.SubdivideAllFaces(subdivisionOperation);
 
             foreach (var vertex in m.Vertices)
                 vertex.Position.Normalize();
 
             return m;
-        }
-
-        /// <summary>
-        /// Splits every face around a point inserted in the center of the face
-        /// </summary>
-        /// <param name="m">The mesh to subdivide</param>
-        /// <returns>the mesh</returns>
-        public static Mesh SubdivideMidpoint(Mesh m)
-        {
-            var faces = m.Faces.ToArray();
-
-            foreach (var face in faces)
-            {
-                Vector3 mid = Vector3.Zero;
-                float count = 0;
-                foreach (var v in face.Vertices)
-                {
-                    mid += v.Position;
-                    count++;
-                }
-
-                face.InsertMidpoint(m.GetVertex(mid / count));
-            }
-
-            return m;
-        }
-
-        /// <summary>
-        /// Splits all the edges of each face, and connects each of the new vertices together
-        /// </summary>
-        /// <param name="m">The m.</param>
-        /// <returns></returns>
-        public static Mesh SubdivideInvertedFace(Mesh m)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

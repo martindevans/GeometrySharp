@@ -284,5 +284,51 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
         #endregion
+
+        #region global mutations
+        private void SubdivideAllFacesWithMidpoint()
+        {
+            var faces = Faces.ToArray();
+
+            foreach (var face in faces)
+            {
+                Vector3 mid = Vector3.Zero;
+                float count = 0;
+                foreach (var v in face.Vertices)
+                {
+                    mid += v.Position;
+                    count++;
+                }
+
+                face.InsertMidpoint(GetVertex(mid / count));
+            }
+        }
+
+        private void SubdivideAllFacesWithInternalFace()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubdivideAllFaces(SubdivideOperation op)
+        {
+            switch (op)
+            {
+                case SubdivideOperation.Midpoint:
+                    SubdivideAllFacesWithMidpoint();
+                    break;
+                case SubdivideOperation.InternalFace:
+                    SubdivideAllFacesWithInternalFace();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public enum SubdivideOperation
+        {
+            Midpoint,
+            InternalFace,
+        }
+        #endregion
     }
 }
