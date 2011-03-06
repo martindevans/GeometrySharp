@@ -72,6 +72,9 @@ namespace GeometrySharp.HalfEdgeGeometry
             for (int i = 0; i < subdivisions; i++)
                 m = SubdivideInvertedFace(m);
 
+            foreach (var vertex in m.Vertices)
+                vertex.Position.Normalize();
+
             return m;
         }
 
@@ -82,7 +85,22 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// <returns>the mesh</returns>
         public static Mesh SubdivideMidpoint(Mesh m)
         {
-            throw new NotImplementedException();
+            var faces = m.Faces.ToArray();
+
+            foreach (var face in faces)
+            {
+                Vector3 mid = Vector3.Zero;
+                float count = 0;
+                foreach (var v in face.Vertices)
+                {
+                    mid += v.Position;
+                    count++;
+                }
+
+                face.InsertMidpoint(m.GetVertex(mid / count));
+            }
+
+            return m;
         }
 
         /// <summary>

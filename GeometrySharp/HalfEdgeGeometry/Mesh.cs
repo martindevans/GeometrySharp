@@ -276,18 +276,12 @@ namespace GeometrySharp.HalfEdgeGeometry
                     throw new MeshMalformedException("Face was not indexed with an associated vertex");
             }
 
-            HalfEdge previous = null;
-            foreach (var edge in f.Edges)
+            var edges = f.Edges.ToArray();
+            for (int i = 0; i < edges.Length; i++)
             {
-                if (previous != null)
-                    previous.Next = null;
-                previous = edge;
-
-                edge.Face = null;
+                edges[i].Face = null;
+                edges[i].Next = null;
             }
-
-            if (previous != null)
-                previous.Next = null;
         }
         #endregion
     }

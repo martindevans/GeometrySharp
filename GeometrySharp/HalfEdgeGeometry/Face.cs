@@ -7,8 +7,10 @@ namespace GeometrySharp.HalfEdgeGeometry
 {
     public class Face
     {
+        public readonly Mesh Mesh;
         public HalfEdge Edge;
 
+        #region enumerators
         public IEnumerable<HalfEdge> Edges
         {
             get
@@ -40,17 +42,38 @@ namespace GeometrySharp.HalfEdgeGeometry
                     yield return f;
             }
         }
-
-        public readonly Mesh Mesh;
+        #endregion
 
         protected internal Face(Mesh m)
         {
             Mesh = m;
         }
 
+        /// <summary>
+        /// Deletes this instance.
+        /// </summary>
         public void Delete()
         {
             Mesh.Delete(this);
+        }
+
+        /// <summary>
+        /// Inserts a midpoint into this face
+        /// Deletes this face
+        /// </summary>
+        /// <param name="midpoint">The midpoint.</param>
+        public void InsertMidpoint(Vertex midpoint)
+        {
+            var edges = Edges.ToArray();
+
+            Delete();
+
+            for (int i = 0; i < edges.Length; i++)
+            {
+                var v1 = edges[i].End;
+                var v2 = edges[(i + 1) % edges.Length].End;
+                Mesh.GetFace(v1, v2, midpoint);
+            }
         }
     }
 }

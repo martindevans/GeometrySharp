@@ -50,6 +50,7 @@ namespace GeometrySharpUnitTests
         }
         #endregion
 
+        #region icosahedron + derivatives
         [TestMethod]
         public void Icosahedron()
         {
@@ -57,12 +58,58 @@ namespace GeometrySharpUnitTests
 
             Assert.AreEqual(12, m.Vertices.Count());
             Assert.AreEqual(20, m.Faces.Count());
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
         }
 
         [TestMethod]
         public void Sphere1()
         {
             Mesh m = PrimitiveShapes.Sphere(1);
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
+
+            Assert.AreEqual(32, m.Vertices.Count());
+            Assert.AreEqual(60, m.Faces.Count());
         }
+
+        [TestMethod]
+        public void Sphere2()
+        {
+            Mesh m = PrimitiveShapes.Sphere(2);
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
+
+            Assert.AreEqual(92, m.Vertices.Count());
+            Assert.AreEqual(180, m.Faces.Count());
+        }
+
+        [TestMethod]
+        public void Sphere3()
+        {
+            Mesh m = PrimitiveShapes.Sphere(3);
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
+
+            Assert.AreEqual(272, m.Vertices.Count());
+            Assert.AreEqual(540, m.Faces.Count());
+        }
+        #endregion
     }
 }
