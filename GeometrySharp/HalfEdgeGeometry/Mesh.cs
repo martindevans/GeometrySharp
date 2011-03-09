@@ -296,22 +296,25 @@ namespace GeometrySharp.HalfEdgeGeometry
         #endregion
 
         #region global mutations
-        private void SubdivideAllFacesWithMidpoint()
+        public void SubdivideAllFaces(Action<Face, Mesh> mutate)
         {
             var faces = Faces.ToArray();
 
             foreach (var face in faces)
-            {
-                Vector3 mid = Vector3.Zero;
-                float count = 0;
-                foreach (var v in face.Vertices)
-                {
-                    mid += v.Position;
-                    count++;
-                }
+                mutate(face, this);
+        }
 
-                face.InsertMidpoint(GetVertex(mid / count));
+        public static void MidpointMutator(Face f, Mesh m)
+        {
+            Vector3 mid = Vector3.Zero;
+            float count = 0;
+            foreach (var v in f.Vertices)
+            {
+                mid += v.Position;
+                count++;
             }
+
+            f.InsertMidpoint(m.GetVertex(mid / count));
         }
 
         private void SubdivideAllFacesWithInternalFace()
@@ -322,12 +325,10 @@ namespace GeometrySharp.HalfEdgeGeometry
             foreach (var edge in edges)
                 newVertices.Add(edge.Split(GetVertex(edge.End.Position * 0.5f + edge.Twin.End.Position * 0.5f)).End);
 
-            var faces = Faces.ToArray();
-
-            foreach (var face in faces)
+            SubdivideAllFaces((f, m) =>
             {
-                var verts = face.Vertices.ToArray();
-                face.Delete();
+                var verts = f.Vertices.ToArray();
+                f.Delete();
 
                 GetFace(verts.Where(a => newVertices.Contains(a)));
 
@@ -342,12 +343,26 @@ namespace GeometrySharp.HalfEdgeGeometry
                         );
                     }
                 }
-            }
+            });
         }
 
-        private void TriangulateAllFaces()
+        public static void TriangulateMutator(Face f, Mesh m)
         {
-            throw new NotImplementedException();
+            int c = 0;
+            foreach (var v in f.Vertices)
+            {
+                c++;
+                if (c > 3)
+                    break;
+            }
+            if (c == 3)
+                return;
+
+            var verts = f.Vertices.ToArray();
+            f.Delete();
+
+            for (int i = 2; i < verts.Length; i++)
+                m.GetFace(verts[0], verts[i - 1], verts[i]);
         }
 
         public void SubdivideAllFaces(SubdivideOperation op)
@@ -355,13 +370,13 @@ namespace GeometrySharp.HalfEdgeGeometry
             switch (op)
             {
                 case SubdivideOperation.Midpoint:
-                    SubdivideAllFacesWithMidpoint();
+                    SubdivideAllFaces(MidpointMutator);
                     break;
                 case SubdivideOperation.InternalFace:
                     SubdivideAllFacesWithInternalFace();
                     break;
                 case SubdivideOperation.Triangulate:
-                    TriangulateAllFaces();
+                    SubdivideAllFaces(TriangulateMutator);
                     break;
                 default:
                     break;

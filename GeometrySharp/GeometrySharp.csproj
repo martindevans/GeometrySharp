@@ -103,12 +103,6 @@
     <Compile Include="HalfEdgeGeometry\Vertex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\HandyCollections\HandyCollections\HandyCollections.csproj">
-      <Project>{C18B7765-C1F8-4769-A114-291D0BDB5865}</Project>
-      <Name>HandyCollections</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
