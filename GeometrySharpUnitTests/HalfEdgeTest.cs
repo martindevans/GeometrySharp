@@ -86,5 +86,27 @@ namespace GeometrySharpUnitTests
             Assert.AreEqual(2, mid.OutgoingEdges.Count());
             Assert.AreEqual(2, mid.IncomingEdges.Count());
         }
+
+        [TestMethod]
+        public void SplitEdgeCheckUpdatedIndices()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(1, 0, 0), "a");
+            var b = m.GetVertex(new Vector3(2, 0, 0), "b");
+            var c = m.GetVertex(new Vector3(3, 0, 0), "c");
+            var d = m.GetVertex(new Vector3(4, 0, 0), "d");
+
+            Face abc = m.GetFace(a, b, c);
+            Face bcd = m.GetFace(c, b, d);
+
+            var bc = m.GetEdge(b, c);
+            var mid = m.GetVertex(new Vector3(5, 0, 0), "m");
+            bc.Split(mid);
+
+            Assert.AreEqual(2, mid.Neighbours.Count());
+            Assert.IsTrue(mid.Neighbours.Contains(abc));
+            Assert.IsTrue(mid.Neighbours.Contains(bcd));
+        }
     }
 }

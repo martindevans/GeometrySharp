@@ -27,6 +27,14 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
+        public IEnumerable<Face> Neighbours
+        {
+            get
+            {
+                return Mesh.BorderingFaces(this);
+            }
+        }
+
         public readonly Mesh Mesh;
 
         protected internal Vertex(Vector3 position, string name, Mesh mesh)

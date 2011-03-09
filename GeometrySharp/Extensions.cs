@@ -9,6 +9,8 @@ namespace GeometrySharp
     {
         public static float Bucketise(this float f, float bucketsize)
         {
+            if (bucketsize == 0)
+                return f;
             return f - f % bucketsize;
         }
     }

@@ -58,6 +58,7 @@ namespace GeometrySharpUnitTests
 
             Assert.AreEqual(12, m.Vertices.Count());
             Assert.AreEqual(20, m.Faces.Count());
+            Assert.AreEqual(60, m.HalfEdges.Count());
 
             foreach (var e in m.HalfEdges)
             {
@@ -116,14 +117,15 @@ namespace GeometrySharpUnitTests
         {
             Mesh m = PrimitiveShapes.Sphere(1, subdivisionOperation: Mesh.SubdivideOperation.InternalFace);
 
+            Assert.AreEqual(42, m.Vertices.Count());
+            Assert.AreEqual(80, m.Faces.Count());
+            Assert.AreEqual(240, m.HalfEdges.Count());
+
             foreach (var e in m.HalfEdges)
             {
                 Assert.IsNotNull(e.Face);
                 Assert.IsNotNull(e.Next);
             }
-
-            Assert.AreEqual(32, m.Vertices.Count());
-            Assert.AreEqual(60, m.Faces.Count());
         }
 
         [TestMethod]
@@ -131,14 +133,15 @@ namespace GeometrySharpUnitTests
         {
             Mesh m = PrimitiveShapes.Sphere(2, subdivisionOperation: Mesh.SubdivideOperation.InternalFace);
 
+            Assert.AreEqual(162, m.Vertices.Count());
+            Assert.AreEqual(320, m.Faces.Count());
+            Assert.AreEqual(960, m.HalfEdges.Count());
+
             foreach (var e in m.HalfEdges)
             {
                 Assert.IsNotNull(e.Face);
                 Assert.IsNotNull(e.Next);
             }
-
-            Assert.AreEqual(92, m.Vertices.Count());
-            Assert.AreEqual(180, m.Faces.Count());
         }
 
         [TestMethod]
@@ -152,8 +155,15 @@ namespace GeometrySharpUnitTests
                 Assert.IsNotNull(e.Next);
             }
 
-            Assert.AreEqual(272, m.Vertices.Count());
-            Assert.AreEqual(540, m.Faces.Count());
+            Assert.AreEqual(642, m.Vertices.Count());
+            Assert.AreEqual(1280, m.Faces.Count());
+            Assert.AreEqual(3840, m.HalfEdges.Count());
+
+            foreach (var e in m.HalfEdges)
+            {
+                Assert.IsNotNull(e.Face);
+                Assert.IsNotNull(e.Next);
+            }
         }
         #endregion
     }

@@ -59,10 +59,14 @@ namespace GeometrySharp.HalfEdgeGeometry
             {
                 bm.Next = ma;
                 Face.Edges.Where(e => e.Next == this).First().Next = am;
+                Mesh.UpdateIndex(midpoint, Face);
             }
 
             if (Twin.Face != null)
+            {
                 Twin.Face.Edges.Where(e => e.Next == Twin).First().Next = bm;
+                Mesh.UpdateIndex(midpoint, Twin.Face);
+            }
 
             return am;
         }

@@ -10,7 +10,7 @@ namespace GeometrySharp.HalfEdgeGeometry
     public class Mesh
     {
         #region fields
-        public const float BUCKET_SIZE = 0.01f;
+        public const float BUCKET_SIZE = 0;
         #endregion
 
         #region constructors
@@ -49,6 +49,11 @@ namespace GeometrySharp.HalfEdgeGeometry
         internal IEnumerable<HalfEdge> VertexIncoming(Vertex vertex)
         {
             return edges.GetOrAdd(vertex, a => new HashSet<HalfEdge>());
+        }
+
+        internal IEnumerable<Face> BorderingFaces(Vertex vertex)
+        {
+            return faces[vertex].Keys;
         }
         #endregion
 
@@ -283,6 +288,11 @@ namespace GeometrySharp.HalfEdgeGeometry
                 edges[i].Next = null;
             }
         }
+
+        internal void UpdateIndex(Vertex vertex, Face face)
+        {
+            faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>()).AddOrUpdate(face, true, (a, b) => true);
+        }
         #endregion
 
         #region global mutations
@@ -306,7 +316,33 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         private void SubdivideAllFacesWithInternalFace()
         {
-            throw new NotImplementedException();
+            var edges = new HashSet<HalfEdge>(HalfEdges.Where(a => a.Primary));
+            var newVertices = new HashSet<Vertex>();
+
+            foreach (var edge in edges)
+                newVertices.Add(edge.Split(GetVertex(edge.End.Position * 0.5f + edge.Twin.End.Position * 0.5f)).End);
+
+            var faces = Faces.ToArray();
+
+            foreach (var face in faces)
+            {
+                var verts = face.Vertices.ToArray();
+                face.Delete();
+
+                GetFace(verts.Where(a => newVertices.Contains(a)));
+
+                for (int i = 0; i < verts.Length; i++)
+                {
+                    if (newVertices.Contains(verts[i]))
+                    {
+                        GetFace(
+                            verts[i],
+                            verts[(i + 1) % verts.Length],
+                            verts[(i + 2) % verts.Length]
+                        );
+                    }
+                }
+            }
         }
 
         public void SubdivideAllFaces(SubdivideOperation op)
@@ -329,6 +365,6 @@ namespace GeometrySharp.HalfEdgeGeometry
             Midpoint,
             InternalFace,
         }
-        #endregion
+        #endregion        
     }
 }
