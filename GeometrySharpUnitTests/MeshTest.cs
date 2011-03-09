@@ -382,5 +382,25 @@ namespace GeometrySharpUnitTests
             Assert.IsTrue(m.Vertices.Contains(c));
         }
         #endregion
+
+        [TestMethod]
+        public void TriangulateCuboid()
+        {
+            Mesh m = PrimitiveShapes.Cuboid(
+                new Vector3(1, 0, 0),
+                new Vector3(2, 0, 0),
+                new Vector3(3, 0, 0),
+                new Vector3(4, 0, 0),
+                new Vector3(5, 0, 0),
+                new Vector3(6, 0, 0),
+                new Vector3(7, 0, 0),
+                new Vector3(8, 0, 0));
+
+            m.SubdivideAllFaces(Mesh.SubdivideOperation.Triangulate);
+
+            Assert.AreEqual(8, m.Vertices.Count());
+            Assert.AreEqual(36, m.HalfEdges.Count());
+            Assert.AreEqual(12, m.Faces.Count());
+        }
     }
 }

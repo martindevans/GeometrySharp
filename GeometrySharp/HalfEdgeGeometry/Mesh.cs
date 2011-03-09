@@ -345,6 +345,11 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
+        private void TriangulateAllFaces()
+        {
+            throw new NotImplementedException();
+        }
+
         public void SubdivideAllFaces(SubdivideOperation op)
         {
             switch (op)
@@ -355,6 +360,9 @@ namespace GeometrySharp.HalfEdgeGeometry
                 case SubdivideOperation.InternalFace:
                     SubdivideAllFacesWithInternalFace();
                     break;
+                case SubdivideOperation.Triangulate:
+                    TriangulateAllFaces();
+                    break;
                 default:
                     break;
             }
@@ -364,6 +372,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             Midpoint,
             InternalFace,
+            Triangulate
         }
         #endregion        
     }
