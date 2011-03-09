@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using System.Collections.Concurrent;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometrySharp.HalfEdgeGeometry
 {
@@ -295,15 +296,25 @@ namespace GeometrySharp.HalfEdgeGeometry
         }
         #endregion
 
-        #region global mutations
-        public void SubdivideAllFaces(Action<Face, Mesh> mutate)
+        #region walks
+        /// <summary>
+        /// Visits all faces in this mesh
+        /// The visitor may mutate or even delete faces without halting the walk
+        /// </summary>
+        /// <param name="visitor">The method to apply to every face</param>
+        public void WalkFaces(Action<Face, Mesh> visitor)
         {
             var faces = Faces.ToArray();
 
             foreach (var face in faces)
-                mutate(face, this);
+                visitor(face, this);
         }
 
+        /// <summary>
+        /// Inserts a midpoint into the middle of the given face
+        /// </summary>
+        /// <param name="f">The f.</param>
+        /// <param name="m">The m.</param>
         public static void MidpointMutator(Face f, Mesh m)
         {
             Vector3 mid = Vector3.Zero;
@@ -317,6 +328,55 @@ namespace GeometrySharp.HalfEdgeGeometry
             f.InsertMidpoint(m.GetVertex(mid / count));
         }
 
+        /// <summary>
+        /// Replaces a face with a set of faces with 3 vertices
+        /// </summary>
+        /// <param name="f">The f.</param>
+        /// <param name="m">The m.</param>
+        public static void TriangulateMutator(Face f, Mesh m)
+        {
+            int c = 0;
+            foreach (var v in f.Vertices)
+            {
+                c++;
+                if (c > 3)
+                    break;
+            }
+            if (c == 3)
+                return;
+
+            var verts = f.Vertices.ToArray();
+            f.Delete();
+
+            for (int i = 2; i < verts.Length; i++)
+                m.GetFace(verts[0], verts[i - 1], verts[i]);
+        }
+
+        /// <summary>
+        /// Copies the data from this mesh into a form ready for rendering
+        /// </summary>
+        /// <typeparam name="V">Type of the vertex</typeparam>
+        /// <typeparam name="I">Type of the index</typeparam>
+        /// <param name="appendIndex">a method which appends a new index to a triangle list index buffer</param>
+        /// <param name="appendVertex">a method which appends a new vertex to a vertex buffer</param>
+        /// <param name="vertexConvertor">a method which converts vertex classes into graphics vertex data</param>
+        public void CopyData<V>(Action<int> appendIndex, Func<V, int> appendVertex, Func<Vertex, V> vertexConvertor)
+        {
+            Dictionary<Vertex, int> indexLookup = Vertices.ToDictionary(v => v, v => appendVertex(vertexConvertor(v)));
+
+            foreach (var f in Faces)
+            {
+                var verts = f.Vertices.ToArray();
+
+                for (int i = 2; i < verts.Length; i++)
+                {
+                    appendIndex(indexLookup[verts[0]]);
+                    appendIndex(indexLookup[verts[i - 1]]);
+                    appendIndex(indexLookup[verts[i]]);
+                }
+            }
+        }
+
         private void SubdivideAllFacesWithInternalFace()
         {
             var edges = new HashSet<HalfEdge>(HalfEdges.Where(a => a.Primary));
@@ -325,7 +385,7 @@ namespace GeometrySharp.HalfEdgeGeometry
             foreach (var edge in edges)
                 newVertices.Add(edge.Split(GetVertex(edge.End.Position * 0.5f + edge.Twin.End.Position * 0.5f)).End);
 
-            SubdivideAllFaces((f, m) =>
+            WalkFaces((f, m) =>
             {
                 var verts = f.Vertices.ToArray();
                 f.Delete();
@@ -346,37 +406,18 @@ namespace GeometrySharp.HalfEdgeGeometry
             });
         }
 
-        public static void TriangulateMutator(Face f, Mesh m)
-        {
-            int c = 0;
-            foreach (var v in f.Vertices)
-            {
-                c++;
-                if (c > 3)
-                    break;
-            }
-            if (c == 3)
-                return;
-
-            var verts = f.Vertices.ToArray();
-            f.Delete();
-
-            for (int i = 2; i < verts.Length; i++)
-                m.GetFace(verts[0], verts[i - 1], verts[i]);
-        }
-
         public void SubdivideAllFaces(SubdivideOperation op)
         {
             switch (op)
             {
                 case SubdivideOperation.Midpoint:
-                    SubdivideAllFaces(MidpointMutator);
+                    WalkFaces(MidpointMutator);
                     break;
                 case SubdivideOperation.InternalFace:
                     SubdivideAllFacesWithInternalFace();
                     break;
                 case SubdivideOperation.Triangulate:
-                    SubdivideAllFaces(TriangulateMutator);
+                    WalkFaces(TriangulateMutator);
                     break;
                 default:
                     break;

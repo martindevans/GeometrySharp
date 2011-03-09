@@ -1,0 +1,1 @@
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\MeshRenderer\MeshRendererContent\obj\x86\Debug\ResolveAssemblyReference.cache

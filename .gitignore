@@ -5,3 +5,5 @@ GeometrySharpUnitTests/bin/*
 GeometrySharpUnitTests/obj/*
 GeometrySharp/obj/*
 /TestResults/*
+MeshRenderer/MeshRenderer/bin/*
+MeshRenderer/MeshRenderer/obj/*
