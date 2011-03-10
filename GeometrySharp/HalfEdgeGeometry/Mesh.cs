@@ -345,11 +345,11 @@ namespace GeometrySharp.HalfEdgeGeometry
             if (c == 3)
                 return;
 
-            var verts = f.Vertices.ToArray();
+            var verts = f.TriangulateFromSinglePoint.ToArray();
             f.Delete();
 
-            for (int i = 2; i < verts.Length; i++)
-                m.GetFace(verts[0], verts[i - 1], verts[i]);
+            for (int i = 0; i < verts.Length; i += 3)
+                m.GetFace(verts[i], verts[i + 1], verts[i + 2]);
         }
 
         /// <summary>
@@ -358,11 +358,11 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// <typeparam name="V">Type of the vertex</typeparam>
         /// <typeparam name="I">Type of the index</typeparam>
         /// <param name="appendIndex">a method which appends a new index to a triangle list index buffer</param>
-        /// <param name="appendVertex">a method which appends a new vertex to a vertex buffer</param>
+        /// <param name="appendVertex">a method which appends a new vertex to a vertex buffer and returns its index</param>
         /// <param name="vertexConvertor">a method which converts vertex classes into graphics vertex data</param>
-        public void CopyData<V>(Action<int> appendIndex, Func<V, int> appendVertex, Func<Vertex, V> vertexConvertor)
+        public void CopyData<V, I>(Action<I> appendIndex, Func<V, I> appendVertex, Func<Vertex, V> vertexConvertor)
         {
-            Dictionary<Vertex, int> indexLookup = Vertices.ToDictionary(v => v, v => appendVertex(vertexConvertor(v)));
+            Dictionary<Vertex, I> indexLookup = Vertices.ToDictionary(v => v, v => appendVertex(vertexConvertor(v)));
 
             foreach (var f in Faces)
             {

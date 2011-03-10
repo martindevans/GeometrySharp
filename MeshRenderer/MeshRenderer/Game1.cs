@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Primitives3D;
+using GeometrySharp.HalfEdgeGeometry;
 
 namespace MeshRenderer
 {
@@ -18,6 +20,20 @@ namespace MeshRenderer
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+
+        SpherePrimitive sphere;
+        CylinderPrimitive cylinder;
+        BasicEffect faceEffect;
+        BasicEffect vertexEffect;
+        BasicEffect edgeEffect;
+
+        Mesh mesh;
+
+        Matrix world;
+        Matrix view;
+        Matrix projection;
+
+        MouseState previousMouse;
 
         public Game1()
         {
@@ -33,7 +49,22 @@ namespace MeshRenderer
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            IsMouseVisible = true;
+
+            mesh = PrimitiveShapes.Cylinder(10, 5, 40, 5);
+            //mesh = PrimitiveShapes.Sphere(3, null, Mesh.SubdivideOperation.InternalFace);
+            //mesh = PrimitiveShapes.Cuboid();
+            mesh.SubdivideAllFaces(Mesh.SubdivideOperation.Triangulate);
+            //foreach (var v in mesh.Vertices)
+            //    v.Position *= 10;
+
+            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver2, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100);
+            view = Matrix.CreateLookAt(new Vector3(0, 0, -15), Vector3.Zero, Vector3.Up);
+            world = Matrix.CreateScale(1);
+
+            graphics.PreferredBackBufferWidth = 1280;
+            graphics.PreferredBackBufferHeight = 800;
+            graphics.ApplyChanges();
 
             base.Initialize();
         }
@@ -44,19 +75,21 @@ namespace MeshRenderer
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
-        }
+            sphere = new SpherePrimitive(GraphicsDevice);
+            cylinder = new CylinderPrimitive(GraphicsDevice);
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// all content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-            // TODO: Unload any non ContentManager content here
+            faceEffect = new BasicEffect(GraphicsDevice);
+            faceEffect.PreferPerPixelLighting = true;
+
+            vertexEffect = new BasicEffect(GraphicsDevice);
+            vertexEffect.EnableDefaultLighting();
+            vertexEffect.PreferPerPixelLighting = true;
+
+            edgeEffect = new BasicEffect(GraphicsDevice);
+            edgeEffect.EnableDefaultLighting();
+            edgeEffect.PreferPerPixelLighting = true;
         }
 
         /// <summary>
@@ -66,11 +99,16 @@ namespace MeshRenderer
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
+            MouseState m = Mouse.GetState();
+            if (previousMouse.LeftButton == ButtonState.Pressed && m.LeftButton == ButtonState.Pressed)
+            {
+                float sensitivity = 0.01f;
+                Vector2 move = new Vector2(m.X - previousMouse.X, m.Y - previousMouse.Y) * sensitivity;
 
-            // TODO: Add your update logic here
+                world *= Matrix.CreateRotationY(move.X);
+                world *= Matrix.CreateRotationX(-move.Y);
+            }
+            previousMouse = m;
 
             base.Update(gameTime);
         }
@@ -83,9 +121,107 @@ namespace MeshRenderer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            DrawMesh(mesh, world, view, projection);
 
             base.Draw(gameTime);
+        }
+
+        private void DrawMesh(Mesh m, Matrix world, Matrix view, Matrix projection)
+        {
+            var previousDepthStencil = GraphicsDevice.DepthStencilState;
+
+            GraphicsDevice.DepthStencilState = new DepthStencilState()
+            {
+                DepthBufferEnable = true,
+                DepthBufferWriteEnable = true,
+            };
+
+            DrawVertices(m, vertexEffect, world, view, projection);
+            DrawEdges(m, edgeEffect, world, view, projection);
+            DrawFaces(m, faceEffect, world, view, projection);
+
+            GraphicsDevice.DepthStencilState = previousDepthStencil;
+        }
+
+        private void DrawVertices(Mesh m, Effect effect, Matrix world, Matrix view, Matrix projection)
+        {
+            foreach (var v in m.Vertices.Select(a => a.Position))
+            {
+                Matrix myWorld = Matrix.CreateScale(0.4f) * Matrix.CreateTranslation(v) * world;
+
+                effect.Parameters["World"].SetValue(myWorld);
+                effect.Parameters["WorldViewProj"].SetValue(myWorld * view * projection);
+                if (effect.Parameters["DiffuseColor"] != null)
+                    effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector4());
+                sphere.Draw(effect);
+            }
+        }
+
+        private void DrawEdges(Mesh m, Effect effect, Matrix world, Matrix view, Matrix projection)
+        {
+            foreach (var edge in m.HalfEdges.Where(a => a.Primary))
+            {
+                var start = edge.Twin.End.Position;
+                var end = edge.End.Position;
+
+                Vector3 position = start * 0.5f + end * 0.5f;
+                Vector3 difference = end - start;
+
+                float length = difference.Length();
+                Matrix scale = Matrix.CreateScale(new Vector3(0.2f, length, 0.2f));
+
+                difference.Normalize();
+                Matrix rotation = Matrix.Identity;
+                Vector3 axis = Vector3.Cross(Vector3.Up, difference);
+                if (axis != Vector3.Zero)
+                {
+                    axis.Normalize();
+                    float angle = (float)Math.Acos(Vector3.Dot(Vector3.Up, difference));
+                    rotation = Matrix.CreateFromAxisAngle(axis, (float.IsNaN(angle) ? 0 : angle));
+                }
+
+                Matrix myWorld = scale * rotation * Matrix.CreateTranslation(position) * world;
+
+                effect.Parameters["World"].SetValue(myWorld);
+                effect.Parameters["WorldViewProj"].SetValue(myWorld * view * projection);
+                if (effect.Parameters["DiffuseColor"] != null)
+                    effect.Parameters["DiffuseColor"].SetValue(Color.Green.ToVector4());
+
+                cylinder.Draw(effect);
+            }
+        }
+
+        private void DrawFaces(Mesh m, Effect effect, Matrix world, Matrix view, Matrix projection)
+        {
+            var triangles = m.Faces.SelectMany(a => a.TriangulateFromSinglePoint).Select(a => new VertexPositionColor(a.Position, Color.WhiteSmoke)).ToArray();
+
+            if (triangles.Length > 0)
+            {
+                GraphicsDevice.DepthStencilState = new DepthStencilState()
+                {
+                    DepthBufferEnable = true,
+                    DepthBufferWriteEnable = false,
+                };
+                GraphicsDevice.RasterizerState = new RasterizerState()
+                {
+                    CullMode = CullMode.None,
+                    FillMode = FillMode.Solid,
+                };
+
+                Matrix myWorld = world;
+
+                effect.Parameters["World"].SetValue(myWorld);
+                effect.Parameters["WorldViewProj"].SetValue(myWorld * view * projection);
+                if (effect.Parameters["DiffuseColor"] != null)
+                    effect.Parameters["DiffuseColor"].SetValue(Color.Blue.ToVector4());
+
+                foreach (var t in effect.CurrentTechnique.Passes)
+                {
+                    t.Apply();
+
+                    GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, triangles, 0, triangles.Length / 3);
+                }
+            }
         }
     }
 }

@@ -34,6 +34,21 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
+        public IEnumerable<Vertex> TriangulateFromSinglePoint
+        {
+            get
+            {
+                var verts = Vertices.ToArray();
+
+                for (int i = 2; i < verts.Length; i++)
+                {
+                    yield return verts[0];
+                    yield return verts[i - 1];
+                    yield return verts[i];
+                }
+            }
+        }
+
         public IEnumerable<Face> Neighbours
         {
             get

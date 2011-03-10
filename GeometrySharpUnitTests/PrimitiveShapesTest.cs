@@ -166,5 +166,17 @@ namespace GeometrySharpUnitTests
             }
         }
         #endregion
+
+        #region cylinder
+        [TestMethod]
+        public void Cylinder()
+        {
+            Mesh m = PrimitiveShapes.Cylinder(5, 2, 10, 10);
+
+            Assert.AreEqual(10, m.Vertices.Count());
+            Assert.AreEqual(30, m.HalfEdges.Count());
+            Assert.AreEqual(7, m.Faces.Count());
+        }
+        #endregion
     }
 }

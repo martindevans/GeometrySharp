@@ -116,13 +116,13 @@
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Myre\Myre\Myre.Entities\%28x86%29 Myre.Entities.csproj">
-      <Project>{5CDABE8C-7C9C-4163-8C85-FEA731088239}</Project>
-      <Name>%28x86%29 Myre.Entities</Name>
+    <ProjectReference Include="..\..\..\Primitives3DSample4.0\Primitives3DSample\Primitives3D\Primitives3DWindows.csproj">
+      <Project>{32848D49-90A9-4289-9418-B336042FB82C}</Project>
+      <Name>Primitives3DWindows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre\Myre.Graphics\%28x86%29 Myre.Graphics.csproj">
-      <Project>{FC3D8E34-3333-42FB-9B47-3A273B1B50D8}</Project>
-      <Name>%28x86%29 Myre.Graphics</Name>
+    <ProjectReference Include="..\..\GeometrySharp\GeometrySharp.csproj">
+      <Project>{EB3E694C-B790-4071-867C-DA60F9E5A70C}</Project>
+      <Name>GeometrySharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\MeshRendererContent\MeshRendererContent.contentproj">
       <Name>MeshRendererContent</Name>

@@ -26,7 +26,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         public Face Face;
 
         public readonly Mesh Mesh;
-        internal readonly bool Primary;
+        public readonly bool Primary;
 
         protected internal HalfEdge(Mesh m)
         {

@@ -114,5 +114,73 @@ namespace GeometrySharp.HalfEdgeGeometry
 
             return m;
         }
+
+        /// <summary>
+        /// Creates a unit cuboid
+        /// </summary>
+        /// <returns></returns>
+        public static Mesh Cuboid()
+        {
+            return Cuboid(
+                new Vector3(-0.5f, -0.5f, 0.5f),
+                new Vector3(0.5f, -0.5f, 0.5f),
+                new Vector3(0.5f, 0.5f, 0.5f),
+                new Vector3(-0.5f, 0.5f, 0.5f),
+
+                new Vector3(-0.5f, -0.5f, -0.5f),
+                new Vector3(0.5f, -0.5f, -0.5f),
+                new Vector3(0.5f, 0.5f, -0.5f),
+                new Vector3(-0.5f, 0.5f, -0.5f)
+            );
+        }
+
+        public static Mesh Cylinder(int segments, int slices, float radius, float height, Func<Vector3, string, Mesh, Vertex> factory = null)
+        {
+            if (slices < 2)
+                throw new ArgumentException("Must be more than 2 slices");
+
+            height /= 2f;
+
+            Mesh m = new Mesh(factory ?? defaultFactory);
+
+            Vertex[][] sliceVerts = new Vertex[slices][];
+            for (int i = 0; i < slices; i++)
+                sliceVerts[i] = new Vertex[segments];
+
+            float angle = 0;
+            float step = MathHelper.TwoPi / (float)segments;
+            for (int segment = 0; segment < segments; segment++)
+            {
+                Vector2 xy = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
+
+                for (int slice = 0; slice < slices; slice++)
+                {
+                    float l = slice / (float)slices;
+                    float z = MathHelper.Lerp(-height, height, l);
+
+                    sliceVerts[slice][segment] = m.GetVertex(new Vector3(xy, z), "slice:" + slice + " seg:" + segment);
+                }
+
+                angle += step;
+            }
+
+            m.GetFace(sliceVerts[0].Reverse());
+            m.GetFace(sliceVerts[slices - 1]);
+
+            for (int segment = 0; segment < segments; segment++)
+            {
+                for (int slice = 0; slice < slices - 1; slice++)
+                {
+                    m.GetFace(
+                        sliceVerts[slice][segment],
+                        sliceVerts[slice][(segment + 1) % segments],
+                        sliceVerts[slice + 1][(segment + 1) % segments],
+                        sliceVerts[slice + 1][segment]
+                    );
+                }
+            }
+
+            return m;
+        }
     }
 }
