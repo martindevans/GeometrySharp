@@ -8,16 +8,39 @@ using GeometrySharp.HalfEdgeGeometry;
 namespace GeometrySharp.ConstructiveSolidGeometry.Primitives
 {
     public class Sphere
-        :IPrimitive
+        :CsgNode
     {
-        public bool Contains(Vector3 point)
+        private int subdivisions;
+        public int Subdivisions
+        {
+            get
+            {
+                return subdivisions;
+            }
+            set
+            {
+                if (value != subdivisions)
+                {
+                    subdivisions = value;
+                    IsDirty = true;
+                }
+            }
+        }
+
+        public Sphere(int subdivisions)
+        {
+            Subdivisions = subdivisions;
+        }
+
+        public override bool Contains(Vector3 point)
         {
             return point.LengthSquared() < 1;
         }
 
-        public Mesh MakeMesh()
+        public override Mesh MakeMesh()
         {
-            throw new NotImplementedException();
+            IsDirty = false;
+            return PrimitiveShapes.Sphere(Subdivisions);
         }
     }
 }

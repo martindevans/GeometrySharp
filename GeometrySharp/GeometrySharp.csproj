@@ -92,7 +92,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConstructiveSolidGeometry\Primitives\IPrimitive.cs" />
+    <Compile Include="ConstructiveSolidGeometry\CsgNode.cs" />
+    <Compile Include="ConstructiveSolidGeometry\Operations\Transform.cs" />
+    <Compile Include="ConstructiveSolidGeometry\Primitives\Cube.cs" />
     <Compile Include="ConstructiveSolidGeometry\Primitives\Sphere.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="HalfEdgeGeometry\Face.cs" />

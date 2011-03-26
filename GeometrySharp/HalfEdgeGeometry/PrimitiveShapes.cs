@@ -54,9 +54,9 @@ namespace GeometrySharp.HalfEdgeGeometry
 
             for (int i = 0; i < icosahedronIndices.Length; i += 3)
             {
-                var a = vertices[icosahedronIndices[i]];
+                var a = vertices[icosahedronIndices[i + 2]];
                 var b = vertices[icosahedronIndices[i + 1]];
-                var c = vertices[icosahedronIndices[i + 2]];
+                var c = vertices[icosahedronIndices[i]];
 
                 Face f = m.GetFace(a, b, c);
             }
@@ -105,12 +105,12 @@ namespace GeometrySharp.HalfEdgeGeometry
             Vertex b7 = m.GetVertex(bottom3);
             Vertex b8 = m.GetVertex(bottom4);
 
-            Face t1234  = m.GetFace(t1, t2, t3, t4);
-            Face t21b56 = m.GetFace(t2, t1, b5, b6);
-            Face t32b67 = m.GetFace(t3, t2, b6, b7);
-            Face t43b78 = m.GetFace(t4, t3, b7, b8);
-            Face t14b85 = m.GetFace(t1, t4, b8, b5);
-            Face b6587  = m.GetFace(b6, b5, b8, b7);
+            Face t1234  = m.GetFace(t4, t3, t2, t1);
+            Face t21b56 = m.GetFace(b6, b5, t1, t2);
+            Face t32b67 = m.GetFace(b7, b6, t2, t3);
+            Face t43b78 = m.GetFace(b8, b7, t3, t4);
+            Face t14b85 = m.GetFace(b5, b8, t4, t1);
+            Face b6587  = m.GetFace(b7, b8, b5, b6);
 
             return m;
         }
@@ -119,7 +119,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// Creates a unit cuboid
         /// </summary>
         /// <returns></returns>
-        public static Mesh Cuboid()
+        public static Mesh Cube()
         {
             return Cuboid(
                 new Vector3(-0.5f, -0.5f, 0.5f),

@@ -51,12 +51,13 @@ namespace MeshRenderer
         {
             IsMouseVisible = true;
 
-            mesh = PrimitiveShapes.Cylinder(10, 5, 40, 5);
+            //mesh = PrimitiveShapes.Cylinder(10, 3, 80, 10);
             //mesh = PrimitiveShapes.Sphere(3, null, Mesh.SubdivideOperation.InternalFace);
-            //mesh = PrimitiveShapes.Cuboid();
+            mesh = PrimitiveShapes.Cube();
+            //mesh = PrimitiveShapes.Icosahedron();
             mesh.SubdivideAllFaces(Mesh.SubdivideOperation.Triangulate);
-            //foreach (var v in mesh.Vertices)
-            //    v.Position *= 10;
+            foreach (var v in mesh.Vertices)
+                v.Position *= 10;
 
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver2, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100);
             view = Matrix.CreateLookAt(new Vector3(0, 0, -15), Vector3.Zero, Vector3.Up);
@@ -130,17 +131,55 @@ namespace MeshRenderer
         {
             var previousDepthStencil = GraphicsDevice.DepthStencilState;
 
+            DrawPrimitives(m, faceEffect, ref world, ref view, ref projection);
+
             GraphicsDevice.DepthStencilState = new DepthStencilState()
             {
                 DepthBufferEnable = true,
                 DepthBufferWriteEnable = true,
             };
+            GraphicsDevice.RasterizerState = new RasterizerState()
+            {
+                CullMode = CullMode.CullCounterClockwiseFace,
+                FillMode = FillMode.Solid,
+            };
 
             DrawVertices(m, vertexEffect, world, view, projection);
-            DrawEdges(m, edgeEffect, world, view, projection);
-            DrawFaces(m, faceEffect, world, view, projection);
+            //DrawEdges(m, edgeEffect, world, view, projection);
+            //DrawFaces(m, faceEffect, world, view, projection);
 
             GraphicsDevice.DepthStencilState = previousDepthStencil;
+        }
+
+        private void DrawPrimitives(Mesh m, Effect effect, ref Matrix world, ref Matrix view, ref Matrix projection)
+        {
+            List<int> indices = new List<int>();
+            List<VertexPositionColor> vertices = new List<VertexPositionColor>();
+            m.CopyData<VertexPositionColor, int>(indices.Add, a => { vertices.Add(a); return vertices.Count - 1; }, a => new VertexPositionColor(a.Position, Color.White));
+
+            GraphicsDevice.DepthStencilState = new DepthStencilState()
+            {
+                DepthBufferEnable = true,
+                DepthBufferWriteEnable = false,
+            };
+            GraphicsDevice.RasterizerState = new RasterizerState()
+            {
+                CullMode = CullMode.CullCounterClockwiseFace,
+                FillMode = FillMode.WireFrame,
+            };
+
+            Matrix myWorld = world;
+
+            effect.Parameters["World"].SetValue(myWorld);
+            effect.Parameters["WorldViewProj"].SetValue(myWorld * view * projection);
+            if (effect.Parameters["DiffuseColor"] != null)
+                effect.Parameters["DiffuseColor"].SetValue(Color.Blue.ToVector4());
+
+            foreach (EffectPass effectPass in effect.CurrentTechnique.Passes)
+            {
+                effectPass.Apply();
+                GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices.ToArray(), 0, vertices.Count, indices.ToArray(), 0, indices.Count / 3);
+            }
         }
 
         private void DrawVertices(Mesh m, Effect effect, Matrix world, Matrix view, Matrix projection)
