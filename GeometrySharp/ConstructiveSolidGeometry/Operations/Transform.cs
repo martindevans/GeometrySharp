@@ -47,7 +47,6 @@ namespace GeometrySharp.ConstructiveSolidGeometry.Operations
         public Transform(CsgNode child, Matrix transformation)
         {
             Child = child;
-            child.Parent = this;
 
             Transformation = transformation;
         }

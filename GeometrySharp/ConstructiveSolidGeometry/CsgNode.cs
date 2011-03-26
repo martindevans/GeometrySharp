@@ -20,7 +20,7 @@ namespace GeometrySharp.ConstructiveSolidGeometry
             {
                 if (parent == null || value == null)
                     parent = value;
-                else
+                else if (!parent.Equals(value))
                     throw new InvalidOperationException("Cannot set parent to " + value + " when " + parent + " is set as parent");
             }
         }

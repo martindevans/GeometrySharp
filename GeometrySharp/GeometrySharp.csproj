@@ -93,7 +93,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConstructiveSolidGeometry\CsgNode.cs" />
+    <Compile Include="ConstructiveSolidGeometry\Operations\Difference.cs" />
+    <Compile Include="ConstructiveSolidGeometry\Operations\Intersection.cs" />
     <Compile Include="ConstructiveSolidGeometry\Operations\Transform.cs" />
+    <Compile Include="ConstructiveSolidGeometry\Operations\Union.cs" />
     <Compile Include="ConstructiveSolidGeometry\Primitives\Cube.cs" />
     <Compile Include="ConstructiveSolidGeometry\Primitives\Sphere.cs" />
     <Compile Include="Extensions.cs" />

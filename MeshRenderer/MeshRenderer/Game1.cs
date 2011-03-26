@@ -10,6 +10,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Primitives3D;
 using GeometrySharp.HalfEdgeGeometry;
+using GeometrySharp.ConstructiveSolidGeometry.Operations;
+using GeometrySharp.ConstructiveSolidGeometry.Primitives;
 
 namespace MeshRenderer
 {
@@ -51,13 +53,9 @@ namespace MeshRenderer
         {
             IsMouseVisible = true;
 
-            //mesh = PrimitiveShapes.Cylinder(10, 3, 80, 10);
-            //mesh = PrimitiveShapes.Sphere(3, null, Mesh.SubdivideOperation.InternalFace);
-            mesh = PrimitiveShapes.Cube();
-            //mesh = PrimitiveShapes.Icosahedron();
-            mesh.SubdivideAllFaces(Mesh.SubdivideOperation.Triangulate);
-            foreach (var v in mesh.Vertices)
-                v.Position *= 10;
+            var tree = new Transform(new Sphere(3), Matrix.CreateScale(10));
+
+            mesh = tree.MakeMesh();
 
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver2, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100);
             view = Matrix.CreateLookAt(new Vector3(0, 0, -15), Vector3.Zero, Vector3.Up);
