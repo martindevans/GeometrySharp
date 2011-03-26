@@ -43,5 +43,23 @@ namespace GeometrySharp.ConstructiveSolidGeometry
         public abstract bool Contains(Vector3 point);
 
         public abstract Mesh MakeMesh();
+
+        protected HashSet<CsgVertex> ClassifyPoints(CsgNode node, Mesh mesh)
+        {
+            HashSet<CsgVertex> inside = new HashSet<CsgVertex>();
+
+            foreach (var vertex in mesh.Vertices.Cast<CsgVertex>())
+            {
+                if (node.Contains(vertex.Position))
+                {
+                    inside.Add(vertex);
+                    vertex.Classification = ContainmentType.Contains;
+                }
+                else
+                    vertex.Classification = ContainmentType.Disjoint;
+            }
+
+            return inside;
+        }
     }
 }

@@ -99,6 +99,7 @@
     <Compile Include="ConstructiveSolidGeometry\Operations\Union.cs" />
     <Compile Include="ConstructiveSolidGeometry\Primitives\Cube.cs" />
     <Compile Include="ConstructiveSolidGeometry\Primitives\Sphere.cs" />
+    <Compile Include="CsgVertex.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="HalfEdgeGeometry\Face.cs" />
     <Compile Include="HalfEdgeGeometry\HalfEdge.cs" />

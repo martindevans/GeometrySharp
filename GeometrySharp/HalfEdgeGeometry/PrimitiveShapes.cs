@@ -119,7 +119,7 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// Creates a unit cuboid
         /// </summary>
         /// <returns></returns>
-        public static Mesh Cube()
+        public static Mesh Cube(Func<Vector3, string, Mesh, Vertex> factory = null)
         {
             return Cuboid(
                 new Vector3(-0.5f, -0.5f, 0.5f),
@@ -130,7 +130,8 @@ namespace GeometrySharp.HalfEdgeGeometry
                 new Vector3(-0.5f, -0.5f, -0.5f),
                 new Vector3(0.5f, -0.5f, -0.5f),
                 new Vector3(0.5f, 0.5f, -0.5f),
-                new Vector3(-0.5f, 0.5f, -0.5f)
+                new Vector3(-0.5f, 0.5f, -0.5f),
+                factory
             );
         }
 

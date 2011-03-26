@@ -40,7 +40,7 @@ namespace GeometrySharp.ConstructiveSolidGeometry.Primitives
         public override Mesh MakeMesh()
         {
             IsDirty = false;
-            return PrimitiveShapes.Sphere(Subdivisions);
+            return PrimitiveShapes.Sphere(Subdivisions, (a, b, c) => new CsgVertex(a, b, c));
         }
     }
 }

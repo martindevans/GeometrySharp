@@ -45,7 +45,23 @@ namespace GeometrySharp.ConstructiveSolidGeometry.Operations
 
         public override Mesh MakeMesh()
         {
-            throw new NotImplementedException();
+            var leftMesh = left.MakeMesh();
+            var rightMesh = right.MakeMesh();
+
+            var insideRight = ClassifyPoints(right, leftMesh);
+            var insideLeft = ClassifyPoints(left, rightMesh);
+
+            foreach (var vertex in insideRight)
+            {
+                foreach (var edge in vertex.OutgoingEdges)
+                {
+                    Vector3 start = vertex.Position;
+                    Vector3 end = edge.End.Position;
+                    //var intersection = right.IntersectionPoint(start, end);
+                }
+            }
+
+            return leftMesh;
         }
     }
 }

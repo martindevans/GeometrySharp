@@ -12,6 +12,7 @@ using Primitives3D;
 using GeometrySharp.HalfEdgeGeometry;
 using GeometrySharp.ConstructiveSolidGeometry.Operations;
 using GeometrySharp.ConstructiveSolidGeometry.Primitives;
+using GeometrySharp;
 
 namespace MeshRenderer
 {
@@ -53,9 +54,7 @@ namespace MeshRenderer
         {
             IsMouseVisible = true;
 
-            var tree = new Transform(new Sphere(3), Matrix.CreateScale(10));
-
-            mesh = tree.MakeMesh();
+            mesh = PrimitiveShapes.Cube();
 
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver2, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100);
             view = Matrix.CreateLookAt(new Vector3(0, 0, -15), Vector3.Zero, Vector3.Up);
@@ -129,7 +128,7 @@ namespace MeshRenderer
         {
             var previousDepthStencil = GraphicsDevice.DepthStencilState;
 
-            DrawPrimitives(m, faceEffect, ref world, ref view, ref projection);
+            //DrawPrimitives(m, faceEffect, ref world, ref view, ref projection);
 
             GraphicsDevice.DepthStencilState = new DepthStencilState()
             {
@@ -143,8 +142,8 @@ namespace MeshRenderer
             };
 
             DrawVertices(m, vertexEffect, world, view, projection);
-            //DrawEdges(m, edgeEffect, world, view, projection);
-            //DrawFaces(m, faceEffect, world, view, projection);
+            DrawEdges(m, edgeEffect, world, view, projection);
+            DrawFaces(m, faceEffect, world, view, projection);
 
             GraphicsDevice.DepthStencilState = previousDepthStencil;
         }
@@ -182,14 +181,14 @@ namespace MeshRenderer
 
         private void DrawVertices(Mesh m, Effect effect, Matrix world, Matrix view, Matrix projection)
         {
-            foreach (var v in m.Vertices.Select(a => a.Position))
+            foreach (var v in m.Vertices.Select(a => new KeyValuePair<Vector3, Color>(a.Position, a is CsgVertex ? (a as CsgVertex).Classification == ContainmentType.Contains ? Color.Green : Color.Red : Color.White)))
             {
-                Matrix myWorld = Matrix.CreateScale(0.4f) * Matrix.CreateTranslation(v) * world;
+                Matrix myWorld = Matrix.CreateScale(0.4f) * Matrix.CreateTranslation(v.Key) * world;
 
                 effect.Parameters["World"].SetValue(myWorld);
                 effect.Parameters["WorldViewProj"].SetValue(myWorld * view * projection);
                 if (effect.Parameters["DiffuseColor"] != null)
-                    effect.Parameters["DiffuseColor"].SetValue(Color.White.ToVector4());
+                    effect.Parameters["DiffuseColor"].SetValue(v.Value.ToVector4());
                 sphere.Draw(effect);
             }
         }
