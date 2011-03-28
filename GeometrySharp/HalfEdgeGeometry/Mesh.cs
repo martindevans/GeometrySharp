@@ -15,9 +15,12 @@ namespace GeometrySharp.HalfEdgeGeometry
         #endregion
 
         #region constructors
-        public Mesh(Func<Vector3, string, Mesh, Vertex> vertexFactory = null)
+        public Mesh(
+            Func<Vector3, string, Mesh, Vertex> vertexFactory = null,
+            Func<Mesh, Face> faceFactory = null)
         {
             this.vertexFactory = vertexFactory ?? ((a, b, c) => new Vertex(a, b, c));
+            this.faceFactory = faceFactory ?? (a => new Face(a));
         }
         #endregion
 
@@ -36,15 +39,26 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         private readonly Func<Vector3, string, Mesh, Vertex> vertexFactory;
 
+        private ConcurrentDictionary<float, Vertex> GetVertexSet(Vector3 pos)
+        {
+            var xD = vertices.GetOrAdd(pos.X, a => new ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>());
+            var yD = xD.GetOrAdd(pos.Y, a => new ConcurrentDictionary<float, Vertex>());
+            return yD;
+        }
+
+        private Vector3 Bucketise(Vector3 pos)
+        {
+            return new Vector3(
+                pos.X.Bucketise(BUCKET_SIZE),
+                pos.Y.Bucketise(BUCKET_SIZE),
+                pos.Z.Bucketise(BUCKET_SIZE)
+            );
+        }
+
         public Vertex GetVertex(Vector3 pos, String name = "")
         {
-            float x = pos.X.Bucketise(BUCKET_SIZE);
-            float y = pos.Y.Bucketise(BUCKET_SIZE);
-            float z = pos.Z.Bucketise(BUCKET_SIZE);
-
-            var xD = vertices.GetOrAdd(x, a => new ConcurrentDictionary<float, ConcurrentDictionary<float, Vertex>>());
-            var yD = xD.GetOrAdd(y, a => new ConcurrentDictionary<float, Vertex>());
-            return yD.GetOrAdd(z, a => vertexFactory(new Vector3(x, y, z), name, this));
+            pos = Bucketise(pos);
+            return GetVertexSet(pos).GetOrAdd(pos.Z, a => vertexFactory(new Vector3(pos.X, pos.Y, pos.Z), name, this));
         }
 
         internal IEnumerable<HalfEdge> VertexIncoming(Vertex vertex)
@@ -55,6 +69,25 @@ namespace GeometrySharp.HalfEdgeGeometry
         internal IEnumerable<Face> BorderingFaces(Vertex vertex)
         {
             return faces[vertex].Keys;
+        }
+
+        public void CleanVertices()
+        {
+            foreach (var v in Vertices.Where(a => a.IncomingEdges.Count() == 0).ToArray())
+                Delete(v);
+        }
+
+        public void Delete(Vertex v)
+        {
+            Vertex removed;
+            if (!GetVertexSet(v.Position).TryRemove(v.Position.Z, out removed) || !v.Equals(removed))
+                throw new MeshMalformedException("Incorrect vertex removed from index, or no such vertex found");
+
+            ConcurrentDictionary<Face, bool> f;
+            faces.TryRemove(v, out f);
+
+            HashSet<HalfEdge> e;
+            edges.TryRemove(v, out e);
         }
         #endregion
 
@@ -141,9 +174,30 @@ namespace GeometrySharp.HalfEdgeGeometry
 
             edges.GetOrAdd(newEndValue, a => new HashSet<HalfEdge>()).Add(halfEdge);
         }
+
+        public void CleanEdges()
+        {
+            foreach (var edge in HalfEdges.Where(a => a.Primary && a.Face == null && a.Twin.Face == null).ToArray())
+                Delete(edge);
+        }
+
+        public void Delete(HalfEdge edge)
+        {
+            if (edge.Face != null)
+                edge.Face.Delete();
+            if (edge.Twin.Face != null)
+                edge.Twin.Face.Delete();
+
+            if (!edges[edge.End].Remove(edge))
+                throw new MeshMalformedException("Edge not correctly indexed");
+            if (!edges[edge.Twin.End].Remove(edge.Twin))
+                throw new MeshMalformedException("Edge not correctly indexed");
+        }
         #endregion
 
         #region faces
+        private readonly Func<Mesh, Face> faceFactory;
+
         ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>> faces = new ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>>();
         public IEnumerable<Face> Faces
         {
@@ -175,13 +229,13 @@ namespace GeometrySharp.HalfEdgeGeometry
         private Face CreateNewFace(Vertex[] vertices)
         {
             List<HalfEdge> edges = new List<HalfEdge>();
-            Face f = new Face(this);
+            Face f = faceFactory(this);
 
             BuildEdgeList(vertices, edges, f);
 
             ConnectEdges(edges);
 
-            f.Edge = edges[0];
+            f.Edge = edges[edges.Count - 1];
 
             foreach (var vertex in vertices)
             {

@@ -46,7 +46,6 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CsgPrimitivesTest.cs" />
     <Compile Include="FaceTest.cs" />
     <Compile Include="HalfEdgeTest.cs" />
     <Compile Include="PrimitiveShapesTest.cs" />

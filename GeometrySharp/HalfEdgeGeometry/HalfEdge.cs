@@ -75,5 +75,10 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             return Twin.End.ToString() + " -> " + End.ToString();
         }
+
+        public void Delete()
+        {
+            Mesh.Delete(this);
+        }
     }
 }

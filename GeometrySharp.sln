@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeshRendererContent", "Mesh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Primitives3DWindows", "..\Primitives3DSample4.0\Primitives3DSample\Primitives3D\Primitives3DWindows.csproj", "{32848D49-90A9-4289-9418-B336042FB82C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometrySharp.Lua", "GeometrySharp.Lua\GeometrySharp.Lua.csproj", "{55AB37BF-9BB7-4130-B13F-09E63C75097F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaInterface", "..\LuaInterface\luainterface\src\LuaInterface\LuaInterface.csproj", "{F55CABBB-4108-4A39-94E1-581FD46DC021}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = GeometrySharp.vsmdi
@@ -103,6 +107,36 @@ Global
 		{32848D49-90A9-4289-9418-B336042FB82C}.Release|Mixed Platforms.Build.0 = Release|x86
 		{32848D49-90A9-4289-9418-B336042FB82C}.Release|x86.ActiveCfg = Release|x86
 		{32848D49-90A9-4289-9418-B336042FB82C}.Release|x86.Build.0 = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Debug|x86.ActiveCfg = Debug|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Debug|x86.Build.0 = Debug|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Profile|Any CPU.ActiveCfg = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Profile|Mixed Platforms.ActiveCfg = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Profile|Mixed Platforms.Build.0 = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Profile|x86.ActiveCfg = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Profile|x86.Build.0 = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Release|Any CPU.ActiveCfg = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Release|Mixed Platforms.Build.0 = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Release|x86.ActiveCfg = Release|x86
+		{55AB37BF-9BB7-4130-B13F-09E63C75097F}.Release|x86.Build.0 = Release|x86
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Profile|Any CPU.ActiveCfg = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Profile|Any CPU.Build.0 = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Profile|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Profile|Mixed Platforms.Build.0 = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Profile|x86.ActiveCfg = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F55CABBB-4108-4A39-94E1-581FD46DC021}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

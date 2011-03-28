@@ -8,7 +8,7 @@ namespace GeometrySharp.HalfEdgeGeometry
 {
     public class Vertex
     {
-        public Vector3 Position;
+        public readonly Vector3 Position;
         public string Name = "";
 
         public IEnumerable<HalfEdge> IncomingEdges
@@ -42,6 +42,11 @@ namespace GeometrySharp.HalfEdgeGeometry
             Mesh = mesh;
             Position = position;
             Name = name;
+        }
+
+        public void Delete()
+        {
+            Mesh.Delete(this);
         }
 
         public override string ToString()

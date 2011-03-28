@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{EB3E694C-B790-4071-867C-DA60F9E5A70C}</ProjectGuid>
+    <ProjectGuid>{55AB37BF-9BB7-4130-B13F-09E63C75097F}</ProjectGuid>
     <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GeometrySharp</RootNamespace>
-    <AssemblyName>GeometrySharp</AssemblyName>
+    <RootNamespace>GeometrySharp.Lua</RootNamespace>
+    <AssemblyName>GeometrySharp.Lua</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <XnaFrameworkVersion>v4.0</XnaFrameworkVersion>
     <XnaPlatform>Windows</XnaPlatform>
     <XnaProfile>HiDef</XnaProfile>
-    <XnaCrossPlatformGroupID>a6e63931-044b-4a8c-affe-392449e25241</XnaCrossPlatformGroupID>
+    <XnaCrossPlatformGroupID>91ed92a8-8947-4a04-b7b0-729883dbe351</XnaCrossPlatformGroupID>
     <XnaOutputType>Library</XnaOutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -92,17 +92,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
-    <Compile Include="HalfEdgeGeometry\Face.cs" />
-    <Compile Include="HalfEdgeGeometry\HalfEdge.cs" />
-    <Compile Include="HalfEdgeGeometry\Mesh.cs" />
-    <Compile Include="HalfEdgeGeometry\MeshMalformedException.cs" />
-    <Compile Include="HalfEdgeGeometry\PrimitiveShapes.cs" />
-    <Compile Include="HalfEdgeGeometry\Vertex.cs" />
-    <Compile Include="Procedural\FaceDevelopment.cs" />
-    <Compile Include="Procedural\FaceDiminishment.cs" />
-    <Compile Include="Procedural\ProceduralFace.cs" />
+    <Compile Include="LuaFaceDevelopment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LuaInterface\luainterface\src\LuaInterface\LuaInterface.csproj">
+      <Project>{F55CABBB-4108-4A39-94E1-581FD46DC021}</Project>
+      <Name>LuaInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GeometrySharp\GeometrySharp.csproj">
+      <Project>{EB3E694C-B790-4071-867C-DA60F9E5A70C}</Project>
+      <Name>GeometrySharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

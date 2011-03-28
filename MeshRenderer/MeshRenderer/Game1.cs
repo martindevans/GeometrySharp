@@ -10,9 +10,9 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Primitives3D;
 using GeometrySharp.HalfEdgeGeometry;
-using GeometrySharp.ConstructiveSolidGeometry.Operations;
-using GeometrySharp.ConstructiveSolidGeometry.Primitives;
 using GeometrySharp;
+using GeometrySharp.Procedural;
+using MeshRenderer.Developments;
 
 namespace MeshRenderer
 {
@@ -37,6 +37,9 @@ namespace MeshRenderer
         Matrix projection;
 
         MouseState previousMouse;
+        KeyboardState previousKeyboard;
+
+        FaceDiminishment diminisher;
 
         public Game1()
         {
@@ -54,7 +57,7 @@ namespace MeshRenderer
         {
             IsMouseVisible = true;
 
-            mesh = PrimitiveShapes.Cube();
+            mesh = PrimitiveShapes.Cuboid(5, 2, 3, new Mesh(null, a => new ProceduralFace(a)));
 
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver2, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100);
             view = Matrix.CreateLookAt(new Vector3(0, 0, -15), Vector3.Zero, Vector3.Up);
@@ -63,6 +66,8 @@ namespace MeshRenderer
             graphics.PreferredBackBufferWidth = 1280;
             graphics.PreferredBackBufferHeight = 800;
             graphics.ApplyChanges();
+
+            (mesh.Faces.Skip(2).First() as ProceduralFace).Development = new GableRoof(3);
 
             base.Initialize();
         }
@@ -107,6 +112,20 @@ namespace MeshRenderer
                 world *= Matrix.CreateRotationX(-move.Y);
             }
             previousMouse = m;
+
+            KeyboardState k = Keyboard.GetState();
+            if (previousKeyboard.IsKeyDown(Keys.Up) && k.IsKeyUp(Keys.Up))
+                foreach (var face in mesh.Faces.Cast<ProceduralFace>().Where(a => a.Development != null))
+                {
+                    var d = face.Develop(diminisher == null ? null : diminisher.Leaves.First());
+                    diminisher = diminisher ?? d;
+                }
+
+            if (previousKeyboard.IsKeyDown(Keys.Down) && k.IsKeyUp(Keys.Down))
+            {
+                foreach (var l in diminisher.Leaves.ToArray()) l.Apply();
+            }
+            previousKeyboard = k;
 
             base.Update(gameTime);
         }
@@ -181,7 +200,7 @@ namespace MeshRenderer
 
         private void DrawVertices(Mesh m, Effect effect, Matrix world, Matrix view, Matrix projection)
         {
-            foreach (var v in m.Vertices.Select(a => new KeyValuePair<Vector3, Color>(a.Position, a is CsgVertex ? (a as CsgVertex).Classification == ContainmentType.Contains ? Color.Green : Color.Red : Color.White)))
+            foreach (var v in m.Vertices.Select(a => new KeyValuePair<Vector3, Color>(a.Position, Color.White)))
             {
                 Matrix myWorld = Matrix.CreateScale(0.4f) * Matrix.CreateTranslation(v.Key) * world;
 

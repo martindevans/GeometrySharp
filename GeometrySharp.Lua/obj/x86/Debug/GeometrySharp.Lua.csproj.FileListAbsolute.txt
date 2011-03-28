@@ -1,0 +1,11 @@
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\bin\x86\Debug\GeometrySharp.Lua.dll
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\bin\x86\Debug\GeometrySharp.Lua.pdb
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\bin\x86\Debug\GeometrySharp.dll
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\bin\x86\Debug\LuaInterface.dll
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\bin\x86\Debug\lua51.dll
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\bin\x86\Debug\GeometrySharp.pdb
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\obj\x86\Debug\GeometrySharp.Lua.dll
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\obj\x86\Debug\GeometrySharp.Lua.pdb
+C:\Users\Martin\Documents\Visual Studio 2010\Projects\GeometrySharp\GeometrySharp.Lua\bin\x86\Debug\LuaInterface.pdb

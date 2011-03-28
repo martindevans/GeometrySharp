@@ -151,5 +151,23 @@ namespace GeometrySharpUnitTests
 
             Assert.AreEqual(3, m.Faces.Count());
         }
+
+        [TestMethod]
+        public void VertexIndicesPreserved()
+        {
+            Mesh m = PrimitiveShapes.Cube();
+
+            Face f = m.Faces.First();
+            Vertex[] v1 = f.Vertices.ToArray();
+
+            f.Delete();
+            Face f2 = m.GetFace(v1);
+            Vertex[] v2 = f2.Vertices.ToArray();
+
+            Assert.AreEqual(v1.Length, v2.Length);
+
+            for (int i = 0; i < v1.Length; i++)
+                Assert.AreEqual(v1[i], v2[i]);
+        }
     }
 }

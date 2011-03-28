@@ -44,11 +44,9 @@ namespace GeometrySharp.HalfEdgeGeometry
                 8, 10, 3,
                 9, 11, 0};
 
-        private static readonly Func<Vector3, string, Mesh, Vertex> defaultFactory = (a, b, c) => new Vertex(a, b, c);
-
-        public static Mesh Icosahedron(Func<Vector3, string, Mesh, Vertex> factory = null)
+        public static Mesh Icosahedron(Mesh m = null)
         {
-            Mesh m = new Mesh(factory ?? defaultFactory);
+            m = m ?? new Mesh();
 
             var vertices = icosahedronVertices.Select((a, i) => m.GetVertex(a, i.ToString())).ToArray();
 
@@ -65,9 +63,9 @@ namespace GeometrySharp.HalfEdgeGeometry
         }
         #endregion
 
-        public static Mesh Sphere(int subdivisions, Func<Vector3, string, Mesh, Vertex> factory = null, Mesh.SubdivideOperation subdivisionOperation = Mesh.SubdivideOperation.InternalFace)
+        public static Mesh Sphere(int subdivisions, Mesh m = null, Mesh.SubdivideOperation subdivisionOperation = Mesh.SubdivideOperation.InternalFace)
         {
-            Mesh m = Icosahedron(factory ?? defaultFactory);
+            m = Icosahedron(m);
 
             for (int i = 0; i < subdivisions; i++)
                 m.SubdivideAllFaces(subdivisionOperation);
@@ -78,6 +76,7 @@ namespace GeometrySharp.HalfEdgeGeometry
             return m;
         }
 
+        #region cuboid
         /// <summary>
         /// Construct a cuboid graph on the given vertices, winding around { top1, top2, top3, top4 } and then all neighbours accordingly
         /// </summary>
@@ -91,9 +90,9 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// <param name="bottom4"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public static Mesh Cuboid(Vector3 top1, Vector3 top2, Vector3 top3, Vector3 top4, Vector3 bottom1, Vector3 bottom2, Vector3 bottom3, Vector3 bottom4, Func<Vector3, string, Mesh, Vertex> factory = null)
+        public static Mesh Cuboid(Vector3 top1, Vector3 top2, Vector3 top3, Vector3 top4, Vector3 bottom1, Vector3 bottom2, Vector3 bottom3, Vector3 bottom4, Mesh m = null)
         {
-            Mesh m = new Mesh(factory ?? defaultFactory);
+            m = m ?? new Mesh();
 
             Vertex t1 = m.GetVertex(top1);
             Vertex t2 = m.GetVertex(top2);
@@ -115,34 +114,40 @@ namespace GeometrySharp.HalfEdgeGeometry
             return m;
         }
 
+        public static Mesh Cuboid(float x, float y, float z, Mesh m = null)
+        {
+            return Cuboid(
+                new Vector3(-x, -y, z),
+                new Vector3(x, -y, z),
+                new Vector3(x, y, z),
+                new Vector3(-x, y, z),
+
+                new Vector3(-x, -y, -z),
+                new Vector3(x, -y, -z),
+                new Vector3(x, y, -z),
+                new Vector3(-x, y, -z),
+                m
+            );
+        }
+
         /// <summary>
         /// Creates a unit cuboid
         /// </summary>
         /// <returns></returns>
-        public static Mesh Cube(Func<Vector3, string, Mesh, Vertex> factory = null)
+        public static Mesh Cube(Mesh m = null)
         {
-            return Cuboid(
-                new Vector3(-0.5f, -0.5f, 0.5f),
-                new Vector3(0.5f, -0.5f, 0.5f),
-                new Vector3(0.5f, 0.5f, 0.5f),
-                new Vector3(-0.5f, 0.5f, 0.5f),
-
-                new Vector3(-0.5f, -0.5f, -0.5f),
-                new Vector3(0.5f, -0.5f, -0.5f),
-                new Vector3(0.5f, 0.5f, -0.5f),
-                new Vector3(-0.5f, 0.5f, -0.5f),
-                factory
-            );
+            return Cuboid(0.5f, 0.5f, 0.5f, m);
         }
+        #endregion
 
-        public static Mesh Cylinder(int segments, int slices, float radius, float height, Func<Vector3, string, Mesh, Vertex> factory = null)
+        public static Mesh Cylinder(int segments, int slices, float radius, float height, Mesh m = null)
         {
             if (slices < 2)
                 throw new ArgumentException("Must be more than 2 slices");
 
             height /= 2f;
 
-            Mesh m = new Mesh(factory ?? defaultFactory);
+            m = m ?? new Mesh();
 
             Vertex[][] sliceVerts = new Vertex[slices][];
             for (int i = 0; i < slices; i++)
