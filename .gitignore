@@ -1,9 +1,11 @@
 *.suo
 *.cache
 GeometrySharp/bin/*
+GeometrySharp/obj/*
 GeometrySharpUnitTests/bin/*
 GeometrySharpUnitTests/obj/*
-GeometrySharp/obj/*
+GeometrySharp.Lua/bin/*
+GeometrySharp.Lua/obj/*
 /TestResults/*
 MeshRenderer/MeshRenderer/bin/*
 MeshRenderer/MeshRenderer/obj/*
