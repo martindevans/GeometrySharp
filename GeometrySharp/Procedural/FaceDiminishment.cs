@@ -8,7 +8,7 @@ namespace GeometrySharp.Procedural
 {
     public class FaceDiminishment
     {
-        Vertex[] border;
+        List<Vertex[]> borders = new List<Vertex[]>();
         Mesh mesh;
 
         HashSet<Face> faces = new HashSet<Face>();
@@ -35,20 +35,15 @@ namespace GeometrySharp.Procedural
             }
         }
 
-        public FaceDiminishment(Face face, FaceDiminishment parent, FaceDevelopment development)
+        public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, Mesh m, params Face[] faces)
         {
-            mesh = face.Mesh;
-            border = face.Vertices.ToArray();
+            mesh = m;
+            borders.AddRange(faces.Select(a => a.Vertices.ToArray()));
 
             Counter = development;
 
             if (parent != null)
-                parent.Add(this, face);
-        }
-
-        public void Add(Face f)
-        {
-            faces.Add(f);
+                parent.Add(this, faces);
         }
 
         public IEnumerable<ProceduralFace> Add(params Face[] f)
@@ -71,10 +66,13 @@ namespace GeometrySharp.Procedural
             {
                 Delete();
 
-                Face f = mesh.GetFace(border);
-                (f as ProceduralFace).Development = Counter;
-                if (Parent != null)
-                    Parent.Add(f);
+                for (int i = 0; i < borders.Count; i++)
+                {
+                    Face f = mesh.GetFace(borders[i]);
+                    (f as ProceduralFace).Development = Counter;
+                    if (Parent != null)
+                        Parent.Add(f);
+                }
 
                 mesh.CleanEdges();
                 mesh.CleanVertices();
@@ -96,9 +94,9 @@ namespace GeometrySharp.Procedural
                 Parent.children.Remove(this);
         }
 
-        private void Add(FaceDiminishment child, Face face)
+        private void Add(FaceDiminishment child, IEnumerable<Face> faces)
         {
-            faces.Remove(face);
+            this.faces.ExceptWith(faces);
 
             if (child.Parent != null)
                 throw new ArgumentException("Child is already in an operation tree");

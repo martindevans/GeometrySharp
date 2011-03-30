@@ -18,7 +18,7 @@ namespace GeometrySharp.Procedural
 
         public FaceDiminishment Apply(ProceduralFace face)
         {
-            FaceDiminishment diminish = new FaceDiminishment(face, Parent, this);
+            FaceDiminishment diminish = new FaceDiminishment(Parent, this, face.Mesh, face);
             
             Apply(face, face.Mesh, diminish);
 
