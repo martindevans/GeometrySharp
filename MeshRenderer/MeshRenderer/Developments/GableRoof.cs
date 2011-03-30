@@ -13,17 +13,15 @@ namespace MeshRenderer.Developments
     {
         public readonly int IndexOffset;
 
-        public GableRoof(int indexOffset)
+        public GableRoof(int indexOffset, FaceDiminishment parentDiminish)
+            :base(parentDiminish)
         {
             IndexOffset = indexOffset;
         }
 
-        public override FaceDiminishment Apply(ProceduralFace face, FaceDiminishment parent = null)
+        protected override void Apply(ProceduralFace face, Mesh m, FaceDiminishment inverse)
         {
             Vertex[] v = face.Vertices.ToArray();
-            Mesh m = face.Mesh;
-
-            FaceDiminishment diminish = new FaceDiminishment(face, parent, this);
 
             face.Delete();
 
@@ -32,20 +30,20 @@ namespace MeshRenderer.Developments
             var v2 = v[(2 + IndexOffset) % v.Length];
             var v3 = v[(3 + IndexOffset) % v.Length];
 
-            Vertex a = m.GetVertex(v0.Position * 0.5f + v1.Position * 0.5f + new Vector3(0, 2, 0));
-            Vertex b = m.GetVertex(v2.Position * 0.5f + v3.Position * 0.5f + new Vector3(0, 2, 0));
+            Vector3 up = -new Plane(v[0].Position, v[1].Position, v[2].Position).Normal;
 
-            var faces = diminish.Add(
+            Vertex a = m.GetVertex(v0.Position * 0.5f + v1.Position * 0.5f + up * 2);
+            Vertex b = m.GetVertex(v2.Position * 0.5f + v3.Position * 0.5f + up * 2);
+
+            var faces = inverse.Add(
                 m.GetFace(v1, v2, b, a),
                 m.GetFace(v3, v0, a, b),
                 m.GetFace(v0, v1, a),
                 m.GetFace(v2, v3, b)
             );
 
-            foreach (var f in faces.Take(1))
-                (f as ProceduralFace).Development = new GableRoof(IndexOffset + 3);
-
-            return diminish;
+            foreach (var f in faces.Take(2))
+                (f as ProceduralFace).Development = new GableRoof(IndexOffset + 3, inverse);
         }
     }
 }

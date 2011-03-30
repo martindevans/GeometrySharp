@@ -67,7 +67,8 @@ namespace MeshRenderer
             graphics.PreferredBackBufferHeight = 800;
             graphics.ApplyChanges();
 
-            (mesh.Faces.Skip(2).First() as ProceduralFace).Development = new GableRoof(3);
+            foreach (var face in mesh.Faces.Skip(2).Take(1).Cast<ProceduralFace>())
+                face.Development = new GableRoof(3, null);
 
             base.Initialize();
         }
@@ -117,13 +118,20 @@ namespace MeshRenderer
             if (previousKeyboard.IsKeyDown(Keys.Up) && k.IsKeyUp(Keys.Up))
                 foreach (var face in mesh.Faces.Cast<ProceduralFace>().Where(a => a.Development != null))
                 {
-                    var d = face.Develop(diminisher == null ? null : diminisher.Leaves.First());
+                    var d = face.Develop();
                     diminisher = diminisher ?? d;
+
+                    mesh.CleanEdges();
+                    mesh.CleanVertices();
                 }
 
             if (previousKeyboard.IsKeyDown(Keys.Down) && k.IsKeyUp(Keys.Down))
             {
-                foreach (var l in diminisher.Leaves.ToArray()) l.Apply();
+                if (diminisher != null)
+                {
+                    if (!diminisher.Apply())
+                        diminisher = null;
+                }
             }
             previousKeyboard = k;
 

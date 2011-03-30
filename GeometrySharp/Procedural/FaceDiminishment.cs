@@ -12,7 +12,7 @@ namespace GeometrySharp.Procedural
         Mesh mesh;
 
         HashSet<Face> faces = new HashSet<Face>();
-        HashSet<FaceDiminishment> children = new HashSet<FaceDiminishment>();
+        List<FaceDiminishment> children = new List<FaceDiminishment>();
 
         public FaceDiminishment Parent
         {
@@ -25,13 +25,13 @@ namespace GeometrySharp.Procedural
         {
             get
             {
-                if (children.Count == 0)
-                    yield return this;
-                else
+                if (children.Count > 0)
                 {
                     foreach (var leaf in children.SelectMany(a => a.Leaves))
                         yield return leaf;
                 }
+                else
+                    yield return this;
             }
         }
 
@@ -51,30 +51,42 @@ namespace GeometrySharp.Procedural
             faces.Add(f);
         }
 
-        public Face[] Add(params Face[] f)
+        public IEnumerable<ProceduralFace> Add(params Face[] f)
         {
             faces.UnionWith(f);
 
-            return f;
+            return f.Where(a => a != null).Cast<ProceduralFace>();
         }
 
-        public void Apply()
+        public bool Apply()
         {
-            Delete();
+            if (children.Count > 0)
+            {
+                for (int i = children.Count - 1; i >= 0; i--)
+                    children[i].Apply();
 
-            Face f = mesh.GetFace(border);
-            (f as ProceduralFace).Development = Counter;
-            if (Parent != null)
-                Parent.Add(f);
+                return true;
+            }
+            else
+            {
+                Delete();
 
-            mesh.CleanEdges();
-            mesh.CleanVertices();
+                Face f = mesh.GetFace(border);
+                (f as ProceduralFace).Development = Counter;
+                if (Parent != null)
+                    Parent.Add(f);
+
+                mesh.CleanEdges();
+                mesh.CleanVertices();
+
+                return false;
+            }
         }
 
         private void Delete()
         {
-            foreach (var c in children)
-                c.Delete();
+            for (int i = children.Count - 1; i >= 0; i--)
+                children[i].Delete();
 
             foreach (var face in faces)
                 face.Delete();

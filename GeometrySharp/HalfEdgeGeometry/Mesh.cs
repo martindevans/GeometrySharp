@@ -219,8 +219,10 @@ namespace GeometrySharp.HalfEdgeGeometry
             Face existingFace = FindExistingFace(vertices);
             if (existingFace != null)
             {
-                CheckPotentiallyConflictingFace(vertices, existingFace);
-                return existingFace;
+                if (IsFaceExactDuplicate(vertices, existingFace))
+                    return existingFace;
+                else
+                    throw new InvalidOperationException("A conflicting face exists");
             }
 
             return CreateNewFace(vertices);
@@ -281,17 +283,25 @@ namespace GeometrySharp.HalfEdgeGeometry
             edges.Add(GetEdge(previous, first, f, null));
         }
 
-        private static void CheckPotentiallyConflictingFace(Vertex[] vertices, Face existingFace)
+        /// <summary>
+        /// Checks if the given face is exactly the same as the face which would be created by the given vertices
+        /// </summary>
+        /// <param name="vertices">The vertices.</param>
+        /// <param name="existingFace">The existing face.</param>
+        /// <returns></returns>
+        private static bool IsFaceExactDuplicate(Vertex[] vertices, Face existingFace)
         {
             var firstIndex = Array.IndexOf(vertices, existingFace.Vertices.First());
             int iteration = 0;
             foreach (var v in existingFace.Vertices)
             {
                 if (v != vertices[(iteration + firstIndex) % vertices.Length])
-                    throw new InvalidOperationException("A conflicting face already exists");
+                    return false;
 
                 iteration++;
             }
+
+            return true;
         }
 
         private Face FindExistingFace(IEnumerable<Vertex> vertices)

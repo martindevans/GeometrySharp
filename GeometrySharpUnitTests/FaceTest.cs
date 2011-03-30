@@ -169,5 +169,25 @@ namespace GeometrySharpUnitTests
             for (int i = 0; i < v1.Length; i++)
                 Assert.AreEqual(v1[i], v2[i]);
         }
+
+        [TestMethod]
+        public void GetSameFaceTwiceWithDifferentVertexIndices()
+        {
+            Mesh m = new Mesh();
+
+            Vertex a = m.GetVertex(new Vector3(0, 0, 1));
+            Vertex b = m.GetVertex(new Vector3(0, 0, 2));
+            Vertex c = m.GetVertex(new Vector3(0, 0, 3));
+            Vertex d = m.GetVertex(new Vector3(0, 0, 4));
+
+            Face abcd = m.GetFace(a, b, c, d);
+            Face bcda = m.GetFace(b, c, d, a);
+            Face cdab = m.GetFace(c, d, a, b);
+            Face dabc = m.GetFace(d, a, b, c);
+
+            Assert.AreEqual(abcd, bcda);
+            Assert.AreEqual(abcd, cdab);
+            Assert.AreEqual(abcd, dabc);
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GeometrySharp.HalfEdgeGeometry;
+using System.Collections.Concurrent;
 
 namespace GeometrySharp.Procedural
 {
@@ -24,18 +25,47 @@ namespace GeometrySharp.Procedural
             }
         }
 
+        private ConcurrentDictionary<String, ISet<String>> tags = new ConcurrentDictionary<string, ISet<string>>();
+
         public ProceduralFace(Mesh m)
             :base(m)
         {
 
         }
 
-        public FaceDiminishment Develop(FaceDiminishment parent = null)
+        #region tags
+        public void Tag(String nameSpace, String t)
+        {
+            tags[nameSpace].Add(t);
+        }
+
+        public ISet<String> GetNameSpace(String nameSpace)
+        {
+            return tags.GetOrAdd(nameSpace, a => new HashSet<String>());
+        }
+
+        public bool HasTag(String nameSpace, String t)
+        {
+            ISet<String> set;
+            if (tags.TryGetValue(nameSpace, out set))
+                return set.Contains(t);
+            return false;
+        }
+
+        public void Untag(String nameSpace, String t)
+        {
+            ISet<String> set;
+            if (tags.TryGetValue(nameSpace, out set))
+                set.Remove(t);
+        }
+        #endregion
+
+        public FaceDiminishment Develop()
         {
             if (Development == null)
                 throw new NullReferenceException("Development is null");
 
-            var dim = Development.Apply(this, parent);
+            var dim = Development.Apply(this);
 
             return dim;
         }

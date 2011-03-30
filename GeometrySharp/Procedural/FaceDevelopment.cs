@@ -9,6 +9,22 @@ namespace GeometrySharp.Procedural
 {
     public abstract class FaceDevelopment
     {
-        public abstract FaceDiminishment Apply(ProceduralFace face, FaceDiminishment parent = null);
+        public readonly FaceDiminishment Parent;
+
+        public FaceDevelopment(FaceDiminishment parent)
+        {
+            Parent = parent;
+        }
+
+        public FaceDiminishment Apply(ProceduralFace face)
+        {
+            FaceDiminishment diminish = new FaceDiminishment(face, Parent, this);
+            
+            Apply(face, face.Mesh, diminish);
+
+            return diminish;
+        }
+
+        protected abstract void Apply(ProceduralFace face, Mesh m, FaceDiminishment inverse);
     }
 }
