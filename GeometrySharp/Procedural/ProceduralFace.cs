@@ -19,9 +19,11 @@ namespace GeometrySharp.Procedural
             }
             set
             {
-                if (development != null)
+                if (development != null && value != null && !development.Equals(value))
                     throw new InvalidOperationException("Cannot set the expansion for a face twice");
                 development = value;
+                if (development != null)
+                    development.BindFace(this);
             }
         }
 
@@ -65,7 +67,7 @@ namespace GeometrySharp.Procedural
             if (Development == null)
                 throw new NullReferenceException("Development is null");
 
-            var dim = Development.Apply(this);
+            var dim = Development.Apply();
 
             return dim;
         }

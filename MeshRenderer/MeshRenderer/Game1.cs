@@ -68,7 +68,7 @@ namespace MeshRenderer
             graphics.ApplyChanges();
 
             foreach (var face in mesh.Faces.Skip(2).Take(1).Cast<ProceduralFace>())
-                face.Development = new GableRoof(3, null);
+                face.Development = new GableRoof(3, mesh, null);
 
             base.Initialize();
         }

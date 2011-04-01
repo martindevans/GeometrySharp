@@ -10,21 +10,38 @@ namespace GeometrySharp.Procedural
     public abstract class FaceDevelopment
     {
         public readonly FaceDiminishment Parent;
+        public readonly Mesh Mesh;
 
-        public FaceDevelopment(FaceDiminishment parent)
+        private HashSet<ProceduralFace> faces = new HashSet<ProceduralFace>();
+
+        public FaceDevelopment(Mesh m, FaceDiminishment parent)
         {
             Parent = parent;
+            Mesh = m;
         }
 
-        public FaceDiminishment Apply(ProceduralFace face)
+        public void BindFace(ProceduralFace f)
         {
-            FaceDiminishment diminish = new FaceDiminishment(Parent, this, face.Mesh, face);
+            if (faces.Add(f))
+                f.Development = this;
+        }
+
+        public void ClearBindings()
+        {
+            foreach (var f in faces)
+                f.Development = null;
+            faces.Clear();
+        }
+
+        public FaceDiminishment Apply()
+        {
+            FaceDiminishment diminish = new FaceDiminishment(Parent, this, Mesh, faces);
             
-            Apply(face, face.Mesh, diminish);
+            Apply(faces, Mesh, diminish);
 
             return diminish;
         }
 
-        protected abstract void Apply(ProceduralFace face, Mesh m, FaceDiminishment inverse);
+        protected abstract void Apply(IEnumerable<ProceduralFace> face, Mesh m, FaceDiminishment inverse);
     }
 }

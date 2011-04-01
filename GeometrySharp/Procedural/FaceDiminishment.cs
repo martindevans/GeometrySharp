@@ -36,6 +36,11 @@ namespace GeometrySharp.Procedural
         }
 
         public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, Mesh m, params Face[] faces)
+            :this(parent, development, m, faces as IEnumerable<Face>)
+        {
+        }
+
+        public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, Mesh m, IEnumerable<Face> faces)
         {
             mesh = m;
             borders.AddRange(faces.Select(a => a.Vertices.ToArray()));
@@ -66,6 +71,7 @@ namespace GeometrySharp.Procedural
             {
                 Delete();
 
+                Counter.ClearBindings();
                 for (int i = 0; i < borders.Count; i++)
                 {
                     Face f = mesh.GetFace(borders[i]);
