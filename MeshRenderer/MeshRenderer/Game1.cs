@@ -23,6 +23,7 @@ namespace MeshRenderer
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        SpriteFont font;
 
         SpherePrimitive sphere;
         CylinderPrimitive cylinder;
@@ -67,8 +68,8 @@ namespace MeshRenderer
             graphics.PreferredBackBufferHeight = 800;
             graphics.ApplyChanges();
 
-            foreach (var face in mesh.Faces.Skip(2).Take(1).Cast<ProceduralFace>())
-                face.Development = new GableRoof(3, mesh, null);
+            //mesh.Faces.Skip(2).Cast<ProceduralFace>().First().Development = new GableRoof(mesh, null);
+            mesh.Faces.Skip(5).Cast<ProceduralFace>().First().Development = new HouseWall(mesh, null);
 
             base.Initialize();
         }
@@ -80,6 +81,7 @@ namespace MeshRenderer
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            font = Content.Load<SpriteFont>("Font");
 
             sphere = new SpherePrimitive(GraphicsDevice);
             cylinder = new CylinderPrimitive(GraphicsDevice);
@@ -147,15 +149,26 @@ namespace MeshRenderer
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             DrawMesh(mesh, world, view, projection);
+            DrawMeshStats(mesh);
 
             base.Draw(gameTime);
+        }
+
+        private void DrawMeshStats(Mesh m)
+        {
+            spriteBatch.Begin();
+            float y = -20;
+            spriteBatch.DrawString(font, "Faces: " + m.Faces.Count(), new Vector2(0, y += 20), Color.WhiteSmoke);
+            spriteBatch.DrawString(font, "Edges: " + m.HalfEdges.Count(), new Vector2(0, y += 20), Color.WhiteSmoke);
+            spriteBatch.DrawString(font, "Vertices: " + m.Vertices.Count(), new Vector2(0, y += 20), Color.WhiteSmoke);
+            spriteBatch.End();
         }
 
         private void DrawMesh(Mesh m, Matrix world, Matrix view, Matrix projection)
         {
             var previousDepthStencil = GraphicsDevice.DepthStencilState;
 
-            //DrawPrimitives(m, faceEffect, ref world, ref view, ref projection);
+            DrawPrimitives(m, faceEffect, ref world, ref view, ref projection);
 
             GraphicsDevice.DepthStencilState = new DepthStencilState()
             {
@@ -169,8 +182,8 @@ namespace MeshRenderer
             };
 
             DrawVertices(m, vertexEffect, world, view, projection);
-            DrawEdges(m, edgeEffect, world, view, projection);
-            DrawFaces(m, faceEffect, world, view, projection);
+            //DrawEdges(m, edgeEffect, world, view, projection);
+            //DrawFaces(m, faceEffect, world, view, projection);
 
             GraphicsDevice.DepthStencilState = previousDepthStencil;
         }

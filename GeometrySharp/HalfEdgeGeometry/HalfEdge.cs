@@ -44,6 +44,9 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public HalfEdge Split(Vertex midpoint)
         {
+            if (midpoint.Equals(End) || midpoint.Equals(Twin.End))
+                return this;
+
             var a = Twin.End;
             var m = midpoint;
             var b = End;

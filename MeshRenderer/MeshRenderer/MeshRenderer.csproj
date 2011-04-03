@@ -108,6 +108,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Developments\GableRoof.cs" />
+    <Compile Include="Developments\HouseWall.cs" />
+    <Compile Include="Developments\WindowWallSection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />

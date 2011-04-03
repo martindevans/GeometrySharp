@@ -11,41 +11,36 @@ namespace MeshRenderer.Developments
     public class GableRoof
         :FaceDevelopment
     {
-        public readonly int IndexOffset;
-
-        public GableRoof(int indexOffset, Mesh m, FaceDiminishment parentDiminish)
+        public GableRoof(Mesh m, FaceDiminishment parentDiminish)
             :base(m, parentDiminish)
         {
-            IndexOffset = indexOffset;
         }
 
         protected override void Apply(IEnumerable<ProceduralFace> faces, Mesh m, FaceDiminishment inverse)
         {
-            ProceduralFace face = faces.First();
+            HashSet<ProceduralFace> added = new HashSet<ProceduralFace>();
 
-            Vertex[] v = face.Vertices.ToArray();
+            foreach (var f in faces)
+                added.UnionWith(Split(f));
 
-            face.Delete();
+            inverse.Add(added);
+        }
 
-            var v0 = v[IndexOffset % v.Length];
-            var v1 = v[(1 + IndexOffset) % v.Length];
-            var v2 = v[(2 + IndexOffset) % v.Length];
-            var v3 = v[(3 + IndexOffset) % v.Length];
+        private IEnumerable<ProceduralFace> Split(Face f)
+        {
+            Vertex[] v = f.Vertices.ToArray();
+
+            f.Delete();
 
             Vector3 up = -new Plane(v[0].Position, v[1].Position, v[2].Position).Normal;
 
-            Vertex a = m.GetVertex(v0.Position * 0.5f + v1.Position * 0.5f + up * 2);
-            Vertex b = m.GetVertex(v2.Position * 0.5f + v3.Position * 0.5f + up * 2);
+            Vertex a = Mesh.GetVertex(v[0].Position * 0.5f + v[1].Position * 0.5f + up * 2);
+            Vertex b = Mesh.GetVertex(v[2].Position * 0.5f + v[3].Position * 0.5f + up * 2);
 
-            var added = inverse.Add(
-                m.GetFace(v1, v2, b, a),
-                m.GetFace(v3, v0, a, b),
-                m.GetFace(v0, v1, a),
-                m.GetFace(v2, v3, b)
-            );
-
-            foreach (var f in added.Take(2))
-                (f as ProceduralFace).Development = new GableRoof(IndexOffset + 3, m, inverse);
+            yield return (ProceduralFace)Mesh.GetFace(v[1], v[2], b, a);
+            yield return (ProceduralFace)Mesh.GetFace(v[3], v[0], a, b);
+            yield return (ProceduralFace)Mesh.GetFace(v[0], v[1], a);
+            yield return (ProceduralFace)Mesh.GetFace(v[2], v[3], b);
         }
     }
 }

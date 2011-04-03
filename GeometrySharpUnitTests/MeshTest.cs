@@ -402,5 +402,103 @@ namespace GeometrySharpUnitTests
             Assert.AreEqual(36, m.HalfEdges.Count());
             Assert.AreEqual(12, m.Faces.Count());
         }
+
+        #region listeners
+        [TestMethod]
+        public void Listener()
+        {
+            Mesh m = new Mesh();
+
+            CounterListener l = new CounterListener();
+            m.AddListener(l);
+
+            var a = m.GetVertex(new Vector3(0, 0, 1));
+            Assert.AreEqual(1, l.Vertices);
+            Assert.AreEqual(0, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+
+            m.Delete(a);
+            Assert.AreEqual(0, l.Vertices);
+            Assert.AreEqual(0, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+
+            a = m.GetVertex(new Vector3(0, 0, 1));
+            Assert.AreEqual(1, l.Vertices);
+            Assert.AreEqual(0, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+
+            var b = m.GetVertex(new Vector3(0, 0, 2));
+            Assert.AreEqual(2, l.Vertices);
+            Assert.AreEqual(0, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+
+            var c = m.GetVertex(new Vector3(0, 0, 3));
+            Assert.AreEqual(3, l.Vertices);
+            Assert.AreEqual(0, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+
+            var d = m.GetVertex(new Vector3(0, 0, 4));
+            Assert.AreEqual(4, l.Vertices);
+            Assert.AreEqual(0, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+
+            var abcd = m.GetFace(a, b, c, d);
+            Assert.AreEqual(4, l.Vertices);
+            Assert.AreEqual(4, l.Edges);
+            Assert.AreEqual(1, l.Faces);
+
+            abcd.Delete();
+            Assert.AreEqual(4, l.Vertices);
+            Assert.AreEqual(4, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+
+            var ab = m.GetEdge(a, b);
+            ab.Delete();
+            Assert.AreEqual(4, l.Vertices);
+            Assert.AreEqual(3, l.Edges);
+            Assert.AreEqual(0, l.Faces);
+        }
+
+        class CounterListener : Mesh.IChangeListener
+        {
+            public int Faces = 0;
+            public int Vertices = 0;
+            public int Edges = 0;
+
+            public void Added(Face f)
+            {
+                Faces++;
+            }
+
+            public void Deleted(Face f)
+            {
+                Faces--;
+            }
+
+            public void Added(Vertex v)
+            {
+                Vertices++;
+            }
+
+            public void Deleted(Vertex v)
+            {
+                Vertices--;
+            }
+
+            public void Added(HalfEdge e)
+            {
+                Edges++;
+
+                Assert.IsTrue(e.Primary);
+            }
+
+            public void Deleted(HalfEdge e)
+            {
+                Edges--;
+
+                Assert.IsTrue(e.Primary);
+            }
+        }
+        #endregion
     }
 }

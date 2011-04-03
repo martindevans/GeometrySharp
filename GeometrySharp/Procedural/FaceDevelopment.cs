@@ -14,6 +14,12 @@ namespace GeometrySharp.Procedural
 
         private HashSet<ProceduralFace> faces = new HashSet<ProceduralFace>();
 
+        public bool Developed
+        {
+            get;
+            internal set;
+        }
+
         public FaceDevelopment(Mesh m, FaceDiminishment parent)
         {
             Parent = parent;
@@ -28,6 +34,7 @@ namespace GeometrySharp.Procedural
 
         public void ClearBindings()
         {
+            Developed = false;
             foreach (var f in faces)
                 f.Development = null;
             faces.Clear();
@@ -35,11 +42,18 @@ namespace GeometrySharp.Procedural
 
         public FaceDiminishment Apply()
         {
-            FaceDiminishment diminish = new FaceDiminishment(Parent, this, Mesh, faces);
-            
-            Apply(faces, Mesh, diminish);
+            if (!Developed)
+            {
+                Developed = true;
 
-            return diminish;
+                FaceDiminishment diminish = new FaceDiminishment(Parent, this, Mesh, faces);
+
+                Apply(faces, Mesh, diminish);
+
+                return diminish;
+            }
+
+            return null;
         }
 
         protected abstract void Apply(IEnumerable<ProceduralFace> face, Mesh m, FaceDiminishment inverse);

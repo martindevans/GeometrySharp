@@ -53,6 +53,11 @@ namespace GeometrySharp.Procedural
 
         public IEnumerable<ProceduralFace> Add(params Face[] f)
         {
+            return Add(f as IEnumerable<Face>);
+        }
+
+        public IEnumerable<ProceduralFace> Add(IEnumerable<Face> f)
+        {
             faces.UnionWith(f);
 
             return f.Where(a => a != null).Cast<ProceduralFace>();

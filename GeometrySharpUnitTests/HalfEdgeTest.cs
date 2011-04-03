@@ -108,5 +108,37 @@ namespace GeometrySharpUnitTests
             Assert.IsTrue(mid.Neighbours.Contains(abc));
             Assert.IsTrue(mid.Neighbours.Contains(bcd));
         }
+
+        [TestMethod]
+        public void SplitEdgeWithDuplicatePoint()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(0, 0, 1), "a");
+            var b = m.GetVertex(new Vector3(0, 0, 2), "b");
+
+            var ab = m.GetEdge(a, b);
+
+            var mid = m.GetVertex(new Vector3(0, 0, 2), "mid");
+
+            ab.Split(mid);
+
+            Assert.IsNull(ab.Face);
+            Assert.IsNull(ab.Next);
+            Assert.IsNull(ab.Twin.Face);
+            Assert.IsNull(ab.Twin.Next);
+
+            Assert.AreEqual(1, a.OutgoingEdges.Count());
+            Assert.AreEqual(1, a.IncomingEdges.Count());
+            Assert.AreEqual(1, b.OutgoingEdges.Count());
+            Assert.AreEqual(1, b.IncomingEdges.Count());
+
+            Assert.AreEqual(1, mid.OutgoingEdges.Count());
+            Assert.AreEqual(1, mid.IncomingEdges.Count());
+
+            Assert.AreEqual(2, m.HalfEdges.Count());
+            Assert.AreEqual(2, m.Vertices.Count());
+            Assert.AreEqual(0, m.Faces.Count());
+        }
     }
 }

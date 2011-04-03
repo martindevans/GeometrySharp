@@ -12,6 +12,8 @@ namespace GeometrySharp.HalfEdgeGeometry
     {
         #region fields
         public const float BUCKET_SIZE = 0;
+
+        private HashSet<IChangeListener> listeners = new HashSet<IChangeListener>();
         #endregion
 
         #region constructors
@@ -58,7 +60,12 @@ namespace GeometrySharp.HalfEdgeGeometry
         public Vertex GetVertex(Vector3 pos, String name = "")
         {
             pos = Bucketise(pos);
-            return GetVertexSet(pos).GetOrAdd(pos.Z, a => vertexFactory(new Vector3(pos.X, pos.Y, pos.Z), name, this));
+            return GetVertexSet(pos).GetOrAdd(pos.Z, a =>
+                {
+                    var v = vertexFactory(new Vector3(pos.X, pos.Y, pos.Z), name, this);
+                    InformAddVertex(v);
+                    return v;
+                });
         }
 
         internal IEnumerable<HalfEdge> VertexIncoming(Vertex vertex)
@@ -79,6 +86,8 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public void Delete(Vertex v)
         {
+            InformDeleteVertex(v);
+
             Vertex removed;
             if (!GetVertexSet(v.Position).TryRemove(v.Position.Z, out removed) || !v.Equals(removed))
                 throw new MeshMalformedException("Incorrect vertex removed from index, or no such vertex found");
@@ -134,6 +143,8 @@ namespace GeometrySharp.HalfEdgeGeometry
                         edge.Next = abNext;
                         twin.Next = baNext;
 
+                        InformAddEdge(edge);
+
                         return edge;
                     }
                 case 1:
@@ -157,6 +168,7 @@ namespace GeometrySharp.HalfEdgeGeometry
 
                         edge.Twin.Face = baf ?? edge.Twin.Face;
                         edge.Twin.Next = baNext ?? edge.Twin.Next;
+
                         return edge;
                     }
                 default:
@@ -183,6 +195,11 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public void Delete(HalfEdge edge)
         {
+            if (!edge.Primary)
+                edge = edge.Twin;
+
+            InformDeleteEdge(edge);
+
             if (edge.Face != null)
                 edge.Face.Delete();
             if (edge.Twin.Face != null)
@@ -244,6 +261,8 @@ namespace GeometrySharp.HalfEdgeGeometry
                 var set = faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>());
                 set.AddOrUpdate(f, true, (a, b) => { throw new InvalidOperationException(); });
             }
+
+            InformAddFace(f);
 
             return f;
         }
@@ -339,6 +358,8 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public void Delete(Face f)
         {
+            InformDeleteFace(f);
+
             foreach (var vertex in f.Vertices)
             {
                 bool b;
@@ -352,6 +373,8 @@ namespace GeometrySharp.HalfEdgeGeometry
                 edges[i].Face = null;
                 edges[i].Next = null;
             }
+
+            f.Edge = null;
         }
 
         internal void UpdateIndex(Vertex vertex, Face face)
@@ -495,5 +518,68 @@ namespace GeometrySharp.HalfEdgeGeometry
             Triangulate
         }
         #endregion        
+
+        #region listeners
+        public void AddListener(IChangeListener l)
+        {
+            listeners.Add(l);
+        }
+
+        public void RemoveListener(IChangeListener l)
+        {
+            listeners.Remove(l);
+        }
+
+        private void InformAddVertex(Vertex v)
+        {
+            foreach (var l in listeners)
+                l.Added(v);
+        }
+
+        private void InformDeleteVertex(Vertex v)
+        {
+            foreach (var l in listeners)
+                l.Deleted(v);
+        }
+
+        private void InformAddEdge(HalfEdge e)
+        {
+            foreach (var l in listeners)
+                l.Added(e);
+        }
+
+        private void InformDeleteEdge(HalfEdge e)
+        {
+            foreach (var l in listeners)
+                l.Deleted(e);
+        }
+
+        private void InformAddFace(Face f)
+        {
+            foreach (var l in listeners)
+                l.Added(f);
+        }
+
+        private void InformDeleteFace(Face f)
+        {
+            foreach (var l in listeners)
+                l.Deleted(f);
+        }
+
+        public interface IChangeListener
+        {
+            void Added(Face f);
+
+            void Deleted(Face f);
+
+            void Added(Vertex v);
+
+            void Deleted(Vertex v);
+
+            void Added(HalfEdge e);
+
+            void Deleted(HalfEdge e);
+        }
+        #endregion
     }
 }
