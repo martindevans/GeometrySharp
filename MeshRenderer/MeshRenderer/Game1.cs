@@ -131,7 +131,7 @@ namespace MeshRenderer
             {
                 if (diminisher != null)
                 {
-                    if (!diminisher.Apply())
+                    if (!diminisher.DeleteLeaves())
                         diminisher = null;
                 }
             }

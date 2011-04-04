@@ -93,12 +93,12 @@ namespace GeometrySharp.Procedural
 
         public void SplitMidpointBegin(HalfEdge e, Vertex mid)
         {
-            changes.Push(new SplitMidpointBeginHalfEdge(e, mid));
+            changes.Push(new BeginSplitMidpointHalfEdge(e, mid));
         }
 
         public void SplitMidpointEnd(HalfEdge e, Vertex mid)
         {
-            changes.Push(new SplitMidpointEndHalfEdge(e, mid));
+            changes.Push(new EndSplitMidpointHalfEdge(e, mid));
         }
 
         public void SplitMidpointBegin(Face f, Vertex mid)
@@ -229,12 +229,12 @@ namespace GeometrySharp.Procedural
             }
         }
 
-        private class SplitMidpointBeginHalfEdge
+        private class BeginSplitMidpointHalfEdge
             : Change
         {
-            public SplitMidpointBeginHalfEdge(HalfEdge e, Vertex m)
+            public BeginSplitMidpointHalfEdge(HalfEdge e, Vertex m)
             {
-                //throw new NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override void Undo(Mesh mesh, Stack<Change> changes)
@@ -243,12 +243,12 @@ namespace GeometrySharp.Procedural
             }
         }
 
-        private class SplitMidpointEndHalfEdge
+        private class EndSplitMidpointHalfEdge
             : Change
         {
-            public SplitMidpointEndHalfEdge(HalfEdge e, Vertex m)
+            public EndSplitMidpointHalfEdge(HalfEdge e, Vertex m)
             {
-                //throw new NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override void Undo(Mesh mesh, Stack<Change> changes)

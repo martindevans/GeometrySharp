@@ -7,11 +7,10 @@ using GeometrySharp.HalfEdgeGeometry;
 namespace GeometrySharp.Procedural
 {
     public class FaceDiminishment
+        :Mesh.IChangeListener
     {
-        List<Vertex[]> borders = new List<Vertex[]>();
-        Mesh mesh;
+        ChangeSet changes;
 
-        HashSet<Face> faces = new HashSet<Face>();
         List<FaceDiminishment> children = new List<FaceDiminishment>();
 
         public FaceDiminishment Parent
@@ -37,88 +36,93 @@ namespace GeometrySharp.Procedural
 
         public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, ChangeSet changes)
         {
-            throw new NotImplementedException();
-        }
-
-        public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, Mesh m, params Face[] faces)
-            :this(parent, development, m, faces as IEnumerable<Face>)
-        {
-        }
-
-        public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, Mesh m, IEnumerable<Face> faces)
-        {
-            mesh = m;
-            borders.AddRange(faces.Select(a => a.Vertices.ToArray()));
-
             Counter = development;
+            this.changes = changes;
 
             if (parent != null)
-                parent.Add(this, faces);
+                parent.Add(this);
         }
 
-        public IEnumerable<ProceduralFace> Add(params Face[] f)
-        {
-            return Add(f as IEnumerable<Face>);
-        }
-
-        public IEnumerable<ProceduralFace> Add(IEnumerable<Face> f)
-        {
-            faces.UnionWith(f);
-
-            return f.Where(a => a != null).Cast<ProceduralFace>();
-        }
-
-        public bool Apply()
+        public bool DeleteLeaves()
         {
             if (children.Count > 0)
             {
                 for (int i = children.Count - 1; i >= 0; i--)
-                    children[i].Apply();
+                    children[i].DeleteLeaves();
 
                 return true;
             }
             else
             {
-                Delete();
-
-                Counter.ClearBindings();
-                for (int i = 0; i < borders.Count; i++)
-                {
-                    Face f = mesh.GetFace(borders[i]);
-                    (f as ProceduralFace).Development = Counter;
-                    if (Parent != null)
-                        Parent.Add(f);
-                }
-
-                mesh.CleanEdges();
-                mesh.CleanVertices();
+                DeleteTree();
 
                 return false;
             }
         }
 
-        private void Delete()
+        private void DeleteTree()
         {
             for (int i = children.Count - 1; i >= 0; i--)
-                children[i].Delete();
+                children[i].DeleteTree();
 
-            foreach (var face in faces)
-                face.Delete();
-            faces.Clear();
+            changes.Mesh.AddListener(this);
+            changes.Undo();
+            changes.Mesh.RemoveListener(this);
 
             if (Parent != null)
                 Parent.children.Remove(this);
         }
 
-        private void Add(FaceDiminishment child, IEnumerable<Face> faces)
+        private void Add(FaceDiminishment child)
         {
-            this.faces.ExceptWith(faces);
-
             if (child.Parent != null)
                 throw new ArgumentException("Child is already in an operation tree");
             child.Parent = this;
 
             children.Add(child);
         }
+
+        #region change listener
+        void Mesh.IChangeListener.Added(Face f)
+        {
+            (f as ProceduralFace).Development = Counter;
+        }
+
+        void Mesh.IChangeListener.Deleted(Face f)
+        {
+        }
+
+        void Mesh.IChangeListener.Added(Vertex v)
+        {
+        }
+
+        void Mesh.IChangeListener.Deleted(Vertex v)
+        {
+        }
+
+        void Mesh.IChangeListener.Added(HalfEdge e)
+        {
+        }
+
+        void Mesh.IChangeListener.Deleted(HalfEdge e)
+        {
+        }
+
+        void Mesh.IChangeListener.SplitMidpointBegin(HalfEdge e, Vertex mid)
+        {
+        }
+
+        void Mesh.IChangeListener.SplitMidpointEnd(HalfEdge e, Vertex mid)
+        {
+        }
+
+        void Mesh.IChangeListener.SplitMidpointBegin(Face f, Vertex mid)
+        {
+        }
+
+        void Mesh.IChangeListener.SplitMidpointEnd(Face f, Vertex mid)
+        {
+        }
+        #endregion
     }
 }

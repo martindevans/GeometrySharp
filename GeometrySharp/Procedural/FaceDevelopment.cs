@@ -47,12 +47,10 @@ namespace GeometrySharp.Procedural
                 Developed = true;
 
                 ChangeSet changes = new ChangeSet(Mesh);
-                FaceDiminishment diminish = new FaceDiminishment(Parent, this, Mesh, faces);
-
                 changes.Begin();
-
-                Apply(faces, Mesh);
-
+                {
+                    Apply(faces, Mesh);
+                }
                 changes.End();
 
                 return new FaceDiminishment(Parent, this, changes);
