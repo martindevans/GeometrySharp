@@ -78,6 +78,28 @@ namespace GeometrySharp.HalfEdgeGeometry
             return am;
         }
 
+        /// <summary>
+        /// Merges this halfedge with the Next
+        /// </summary>
+        public void Merge()
+        {
+            if (Face != Next.Face || Twin.Face != Next.Twin.Face)
+                throw new InvalidOperationException("Cannot merge edges unless they are both bordering the same face and the twins both border the same face");
+
+            var oldNext = Next;
+            Next.Face = null;
+            Next.Twin.Face = null;
+
+            Next = Next.Next;
+            Next.Next.Twin.Next = Twin;
+
+            Face.Edge = this;
+            if (Twin.Face != null)
+                Twin.Face.Edge = Twin;
+
+            Mesh.Delete(oldNext);
+        }
+
         public override string ToString()
         {
             return Twin.End.ToString() + " -> " + End.ToString();

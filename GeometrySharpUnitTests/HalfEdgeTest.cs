@@ -140,5 +140,26 @@ namespace GeometrySharpUnitTests
             Assert.AreEqual(2, m.Vertices.Count());
             Assert.AreEqual(0, m.Faces.Count());
         }
+
+        [TestMethod]
+        public void MergeEdges()
+        {
+            Mesh m = new Mesh();
+
+            var a = m.GetVertex(new Vector3(0, 0, 1), "a");
+            var b = m.GetVertex(new Vector3(0, 0, 2), "b");
+            var c = m.GetVertex(new Vector3(0, 0, 3), "c");
+            var d = m.GetVertex(new Vector3(0, 0, 4), "d");
+
+            var abcd = m.GetFace(a, b, c, d);
+
+            var ab = m.GetEdge(a, b);
+
+            Assert.AreEqual(8, m.HalfEdges.Count());
+
+            ab.Merge();
+
+            Assert.AreEqual(6, m.HalfEdges.Count());
+        }
     }
 }
