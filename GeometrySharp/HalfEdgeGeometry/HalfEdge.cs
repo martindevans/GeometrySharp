@@ -44,6 +44,8 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         public HalfEdge Split(Vertex midpoint)
         {
+            Mesh.InformSplitMidpointBegin(this, midpoint);
+
             if (midpoint.Equals(End) || midpoint.Equals(Twin.End))
                 return this;
 
@@ -70,6 +72,8 @@ namespace GeometrySharp.HalfEdgeGeometry
                 Twin.Face.Edges.Where(e => e.Next == Twin).First().Next = bm;
                 Mesh.UpdateIndex(midpoint, Twin.Face);
             }
+
+            Mesh.InformSplitMidpointEnd(this, midpoint);
 
             return am;
         }

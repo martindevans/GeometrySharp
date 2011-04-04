@@ -46,16 +46,21 @@ namespace GeometrySharp.Procedural
             {
                 Developed = true;
 
+                ChangeSet changes = new ChangeSet(Mesh);
                 FaceDiminishment diminish = new FaceDiminishment(Parent, this, Mesh, faces);
 
-                Apply(faces, Mesh, diminish);
+                changes.Begin();
 
-                return diminish;
+                Apply(faces, Mesh);
+
+                changes.End();
+
+                return new FaceDiminishment(Parent, this, changes);
             }
 
             return null;
         }
 
-        protected abstract void Apply(IEnumerable<ProceduralFace> face, Mesh m, FaceDiminishment inverse);
+        protected abstract void Apply(IEnumerable<ProceduralFace> face, Mesh m);
     }
 }

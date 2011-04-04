@@ -79,6 +79,8 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// <param name="midpoint">The midpoint.</param>
         public void InsertMidpoint(Vertex midpoint)
         {
+            Mesh.InformSplitMidpointBegin(this, midpoint);
+
             var edges = Edges.ToArray();
 
             Delete();
@@ -89,6 +91,8 @@ namespace GeometrySharp.HalfEdgeGeometry
                 var v2 = edges[(i + 1) % edges.Length].End;
                 Mesh.GetFace(v1, v2, midpoint);
             }
+
+            Mesh.InformSplitMidpointEnd(this, midpoint);
         }
     }
 }

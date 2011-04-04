@@ -15,14 +15,12 @@ namespace MeshRenderer.Developments
         {
         }
 
-        protected override void Apply(IEnumerable<ProceduralFace> faces, Mesh m, FaceDiminishment inverse)
+        protected override void Apply(IEnumerable<ProceduralFace> faces, Mesh m)
         {
             HashSet<ProceduralFace> added = new HashSet<ProceduralFace>();
 
             foreach (var f in faces)
                 added.UnionWith(Split(f));
-
-            inverse.Add(added);
         }
 
         private IEnumerable<ProceduralFace> Split(Face f)

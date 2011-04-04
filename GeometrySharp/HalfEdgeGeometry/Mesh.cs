@@ -566,6 +566,30 @@ namespace GeometrySharp.HalfEdgeGeometry
                 l.Deleted(f);
         }
 
+        internal void InformSplitMidpointBegin(HalfEdge e, Vertex v)
+        {
+            foreach (var l in listeners)
+                l.SplitMidpointBegin(e, v);
+        }
+
+        internal void InformSplitMidpointEnd(HalfEdge e, Vertex v)
+        {
+            foreach (var l in listeners)
+                l.SplitMidpointEnd(e, v);
+        }
+
+        internal void InformSplitMidpointBegin(Face f, Vertex v)
+        {
+            foreach (var l in listeners)
+                l.SplitMidpointBegin(f, v);
+        }
+
+        internal void InformSplitMidpointEnd(Face f, Vertex v)
+        {
+            foreach (var l in listeners)
+                l.SplitMidpointEnd(f, v);
+        }
+
         public interface IChangeListener
         {
             void Added(Face f);
@@ -579,6 +603,14 @@ namespace GeometrySharp.HalfEdgeGeometry
             void Added(HalfEdge e);
 
             void Deleted(HalfEdge e);
+
+            void SplitMidpointBegin(HalfEdge e, Vertex mid);
+
+            void SplitMidpointEnd(HalfEdge e, Vertex mid);
+
+            void SplitMidpointBegin(Face f, Vertex mid);
+
+            void SplitMidpointEnd(Face f, Vertex mid);
         }
         #endregion
     }

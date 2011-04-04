@@ -99,6 +99,7 @@
     <Compile Include="HalfEdgeGeometry\MeshMalformedException.cs" />
     <Compile Include="HalfEdgeGeometry\PrimitiveShapes.cs" />
     <Compile Include="HalfEdgeGeometry\Vertex.cs" />
+    <Compile Include="Procedural\ChangeSet.cs" />
     <Compile Include="Procedural\FaceDevelopment.cs" />
     <Compile Include="Procedural\FaceDiminishment.cs" />
     <Compile Include="Procedural\ProceduralFace.cs" />

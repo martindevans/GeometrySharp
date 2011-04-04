@@ -498,6 +498,27 @@ namespace GeometrySharpUnitTests
 
                 Assert.IsTrue(e.Primary);
             }
+
+
+            public void SplitMidpointBegin(HalfEdge e, Vertex mid)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SplitMidpointEnd(HalfEdge e, Vertex mid)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SplitMidpointBegin(Face f, Vertex mid)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SplitMidpointEnd(Face f, Vertex mid)
+            {
+                throw new NotImplementedException();
+            }
         }
         #endregion
     }

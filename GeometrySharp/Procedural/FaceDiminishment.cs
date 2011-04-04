@@ -35,6 +35,11 @@ namespace GeometrySharp.Procedural
             }
         }
 
+        public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, ChangeSet changes)
+        {
+            throw new NotImplementedException();
+        }
+
         public FaceDiminishment(FaceDiminishment parent, FaceDevelopment development, Mesh m, params Face[] faces)
             :this(parent, development, m, faces as IEnumerable<Face>)
         {

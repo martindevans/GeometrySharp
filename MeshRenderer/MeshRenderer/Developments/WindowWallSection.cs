@@ -15,7 +15,7 @@ namespace MeshRenderer.Developments
         {
         }
 
-        protected override void Apply(IEnumerable<ProceduralFace> face, Mesh m, FaceDiminishment inverse)
+        protected override void Apply(IEnumerable<ProceduralFace> face, Mesh m)
         {
             throw new NotImplementedException();
         }
