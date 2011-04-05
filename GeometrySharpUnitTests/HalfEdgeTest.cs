@@ -22,7 +22,9 @@ namespace GeometrySharpUnitTests
 
             var f = m.GetFace(a, b, c);
 
-            m.GetEdge(a, b).Split(m.GetVertex(new Vector3(4, 0, 0), "mid"));
+            var mid = m.GetVertex(new Vector3(4, 0, 0), "mid");
+            var ab = m.GetEdge(a, b);
+            ab.Split(mid);
 
             Assert.AreEqual(4, f.Edges.Count());
             Assert.AreEqual(4, f.Vertices.Count());
@@ -50,6 +52,12 @@ namespace GeometrySharpUnitTests
             var bc = m.GetEdge(b, c);
             bc.Split(m.GetVertex(new Vector3(5, 0, 0), "m"));
 
+            foreach (var face in m.Faces)
+            {
+                foreach (var edge in face.Edges)
+                    Assert.AreEqual(edge.End, edge.Next.Twin.End);
+            }
+
             Assert.AreEqual(4, abc.Edges.Count());
             Assert.AreEqual(1, abc.Neighbours.Count());
             Assert.AreEqual(4, abc.Vertices.Count());
@@ -71,7 +79,12 @@ namespace GeometrySharpUnitTests
 
             var mid = m.GetVertex(Vector3.Up, "mid");
 
-            ab.Split(mid);
+            var splitResult = ab.Split(mid);
+
+            Assert.AreEqual(ab.End, b);
+            Assert.AreEqual(ab.Twin.End, mid);
+            Assert.AreEqual(splitResult.End, mid);
+            Assert.AreEqual(splitResult.Twin.End, a);
 
             Assert.IsNull(ab.Face);
             Assert.IsNull(ab.Next);
@@ -142,7 +155,7 @@ namespace GeometrySharpUnitTests
         }
 
         [TestMethod]
-        public void MergeEdges()
+        public void MergeEdgesAroundALoneFace()
         {
             Mesh m = new Mesh();
 
@@ -159,7 +172,73 @@ namespace GeometrySharpUnitTests
 
             ab.Merge();
 
+            Assert.AreEqual(c, ab.End);
+            Assert.AreEqual(ab.Next, m.GetEdge(c, d, false));
+            Assert.IsNull(m.GetEdge(a, b, false));
+            Assert.AreEqual(ab, m.GetEdge(d, a, false).Next);
+
             Assert.AreEqual(6, m.HalfEdges.Count());
+            Assert.AreEqual(3, m.HalfEdges.Where(e => e.Face == null).Count());
+            Assert.AreEqual(0, m.HalfEdges.Where(e => e.Face != null && e.Next == null).Count());
+            Assert.AreEqual(0, m.HalfEdges.Where(e => e.Face == null && e.Next != null).Count());
+        }
+
+        [TestMethod]
+        public void MergeEdgesOnACube()
+        {
+            Mesh m = PrimitiveShapes.Cube();
+
+            var e = m.HalfEdges.First();
+            var a = e.Twin.End;
+            var b = e.End;
+            var x = m.GetVertex(new Vector3(0, 0, 100));
+
+            Assert.AreEqual(9, m.Vertices.Count());
+            Assert.AreEqual(24, m.HalfEdges.Count());
+            Assert.AreEqual(6, m.Faces.Count());
+
+            var e2 = e.Split(x);
+
+            foreach (var face in m.Faces)
+            {
+                foreach (var edge in face.Edges)
+                    Assert.AreEqual(edge.End, edge.Next.Twin.End);
+            }
+
+            Assert.AreEqual(e.End, b);
+            Assert.AreEqual(e.Twin.End, x);
+            Assert.AreEqual(e2.End, x);
+            Assert.AreEqual(e2.Twin.End, a);
+
+            Assert.AreEqual(9, m.Vertices.Count());
+            Assert.AreEqual(26, m.HalfEdges.Count());
+            Assert.AreEqual(6, m.Faces.Count());
+
+            e2.Merge();
+
+            foreach (var face in m.Faces)
+            {
+                foreach (var edge in face.Edges)
+                    Assert.AreEqual(edge.End, edge.Next.Twin.End);
+            }
+
+            Assert.AreEqual(9, m.Vertices.Count());
+            Assert.AreEqual(24, m.HalfEdges.Count());
+            Assert.AreEqual(6, m.Faces.Count());
+
+            foreach (var face in m.Faces)
+            {
+                Assert.AreEqual(4, face.Edges.Count());
+                Assert.AreEqual(4, face.Vertices.Count());
+                Assert.AreEqual(4, face.Neighbours.Count());
+                Assert.IsFalse(face.Vertices.Contains(x));
+            }
+
+            m.CleanVertices();
+
+            Assert.AreEqual(8, m.Vertices.Count());
+            Assert.AreEqual(24, m.HalfEdges.Count());
+            Assert.AreEqual(6, m.Faces.Count());
         }
     }
 }

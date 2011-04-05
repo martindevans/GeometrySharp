@@ -182,7 +182,7 @@ namespace MeshRenderer
             };
 
             DrawVertices(m, vertexEffect, world, view, projection);
-            //DrawEdges(m, edgeEffect, world, view, projection);
+            DrawEdges(m, edgeEffect, world, view, projection);
             //DrawFaces(m, faceEffect, world, view, projection);
 
             GraphicsDevice.DepthStencilState = previousDepthStencil;

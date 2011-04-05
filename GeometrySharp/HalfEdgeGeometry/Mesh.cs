@@ -75,7 +75,7 @@ namespace GeometrySharp.HalfEdgeGeometry
 
         internal IEnumerable<Face> BorderingFaces(Vertex vertex)
         {
-            return faces[vertex].Keys;
+            return vertex.OutgoingEdges.Select(a => a.Face).Where(a => a != null).Distinct();
         }
 
         public void CleanVertices()
@@ -92,10 +92,13 @@ namespace GeometrySharp.HalfEdgeGeometry
             if (!GetVertexSet(v.Position).TryRemove(v.Position.Z, out removed) || !v.Equals(removed))
                 throw new MeshMalformedException("Incorrect vertex removed from index, or no such vertex found");
 
-            ConcurrentDictionary<Face, bool> f;
-            faces.TryRemove(v, out f);
+            foreach (var face in v.Neighbours)
+                face.Delete();
 
             HashSet<HalfEdge> e;
+            if (edges.TryGetValue(v, out e))
+                foreach (var edge in e.ToArray())
+                    edge.Delete();
             edges.TryRemove(v, out e);
         }
         #endregion
@@ -112,17 +115,17 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
 
-        public HalfEdge GetEdge(Vertex a, Vertex b)
+        public HalfEdge GetEdge(Vertex a, Vertex b, bool allowCreation=true)
         {
-            return GetEdge(a, b, null, null);
+            return GetEdge(a, b, null, null, allowCreation);
         }
 
-        public HalfEdge GetEdge(Vertex a, Vertex b, Face f, HalfEdge abNext)
+        public HalfEdge GetEdge(Vertex a, Vertex b, Face f, HalfEdge abNext, bool allowCreation = true)
         {
-            return GetEdge(a, b, f, abNext, null, null);
+            return GetEdge(a, b, f, abNext, null, null, allowCreation);
         }
 
-        public HalfEdge GetEdge(Vertex a, Vertex b, Face abf, HalfEdge abNext, Face baf, HalfEdge baNext)
+        public HalfEdge GetEdge(Vertex a, Vertex b, Face abf, HalfEdge abNext, Face baf, HalfEdge baNext, bool allowCreation = true)
         {
             HashSet<HalfEdge> edgesEndingAtB = edges.GetOrAdd(b, k => new HashSet<HalfEdge>());
 
@@ -131,21 +134,26 @@ namespace GeometrySharp.HalfEdgeGeometry
             {
                 case 0:
                     {
-                        HalfEdge edge = new HalfEdge(this);
-                        HalfEdge twin = edge.Twin;
+                        if (allowCreation)
+                        {
+                            HalfEdge edge = new HalfEdge(this);
+                            HalfEdge twin = edge.Twin;
 
-                        edge.End = b;
-                        twin.End = a;
+                            edge.End = b;
+                            twin.End = a;
 
-                        edge.Face = abf;
-                        twin.Face = baf;
+                            edge.Face = abf;
+                            twin.Face = baf;
 
-                        edge.Next = abNext;
-                        twin.Next = baNext;
+                            edge.Next = abNext;
+                            twin.Next = baNext;
 
-                        InformAddEdge(edge);
+                            InformAddEdge(edge);
 
-                        return edge;
+                            return edge;
+                        }
+                        else
+                            return null;
                     }
                 case 1:
                     {
@@ -185,7 +193,26 @@ namespace GeometrySharp.HalfEdgeGeometry
                 edges.GetOrAdd(halfEdge.End, a => new HashSet<HalfEdge>()).Remove(halfEdge);
 
             edges.GetOrAdd(newEndValue, a => new HashSet<HalfEdge>()).Add(halfEdge);
+
+            //if (halfEdge.Face != null)
+            //{
+            //    UnindexFace(halfEdge.Face, halfEdge.End);
+
+            //    IndexFace(halfEdge.Face, newEndValue);
+            //}
         }
+
+        //private void UnindexFace(Face f, Vertex v)
+        //{
+        //    bool b;
+        //    if (faces.GetOrAdd(v, a => new ConcurrentDictionary<Face, bool>()).TryRemove(f, out b))
+        //        throw new MeshMalformedException("Face was not correctly indexed");
+        //}
+
+        //private void IndexFace(Face f, Vertex v)
+        //{
+        //    faces.GetOrAdd(v, a => new ConcurrentDictionary<Face, bool>()).AddOrUpdate(f, true, (x, y) => y);
+        //}
 
         public void CleanEdges()
         {
@@ -215,12 +242,11 @@ namespace GeometrySharp.HalfEdgeGeometry
         #region faces
         private readonly Func<Mesh, Face> faceFactory;
 
-        ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>> faces = new ConcurrentDictionary<Vertex, ConcurrentDictionary<Face, bool>>();
         public IEnumerable<Face> Faces
         {
             get
             {
-                return faces.SelectMany(a => a.Value.Keys).GroupBy(a => a).Select(a => a.First());
+                return HalfEdges.Select(a => a.Face).Where(a => a != null).Distinct();
             }
         }
 
@@ -255,12 +281,6 @@ namespace GeometrySharp.HalfEdgeGeometry
             ConnectEdges(edges);
 
             f.Edge = edges[edges.Count - 1];
-
-            foreach (var vertex in vertices)
-            {
-                var set = faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>());
-                set.AddOrUpdate(f, true, (a, b) => { throw new InvalidOperationException(); });
-            }
 
             InformAddFace(f);
 
@@ -329,7 +349,7 @@ namespace GeometrySharp.HalfEdgeGeometry
             int iterations = 0;
             foreach (var v in vertices)
             {
-                var keys = faces.GetOrAdd(v, k => new ConcurrentDictionary<Face, bool>()).Keys;
+                var keys = v.Neighbours;
 
                 if (iterations == 0)
                     existingFaces.UnionWith(keys);
@@ -360,13 +380,6 @@ namespace GeometrySharp.HalfEdgeGeometry
         {
             InformDeleteFace(f);
 
-            foreach (var vertex in f.Vertices)
-            {
-                bool b;
-                if (!faces[vertex].TryRemove(f, out b))
-                    throw new MeshMalformedException("Face was not indexed with an associated vertex");
-            }
-
             var edges = f.Edges.ToArray();
             for (int i = 0; i < edges.Length; i++)
             {
@@ -375,11 +388,6 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
 
             f.Edge = null;
-        }
-
-        internal void UpdateIndex(Vertex vertex, Face face)
-        {
-            faces.GetOrAdd(vertex, a => new ConcurrentDictionary<Face, bool>()).AddOrUpdate(face, true, (a, b) => true);
         }
         #endregion
 

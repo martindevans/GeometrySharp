@@ -21,7 +21,7 @@ namespace GeometrySharp.HalfEdgeGeometry
                 {
                     yield return e;
                     e = e.Next;
-                } while (e != null && e != Edge);
+                } while (e != Edge);
             }
         }
 

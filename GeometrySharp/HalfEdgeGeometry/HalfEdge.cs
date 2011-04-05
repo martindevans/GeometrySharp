@@ -22,7 +22,13 @@ namespace GeometrySharp.HalfEdgeGeometry
             }
         }
         public readonly HalfEdge Twin;
-        public HalfEdge Next;
+
+        public HalfEdge Next
+        {
+            get;
+            set;
+        }
+
         public Face Face;
 
         public readonly Mesh Mesh;
@@ -64,13 +70,11 @@ namespace GeometrySharp.HalfEdgeGeometry
             {
                 bm.Next = ma;
                 Face.Edges.Where(e => e.Next == this).First().Next = am;
-                Mesh.UpdateIndex(midpoint, Face);
             }
 
             if (Twin.Face != null)
             {
                 Twin.Face.Edges.Where(e => e.Next == Twin).First().Next = bm;
-                Mesh.UpdateIndex(midpoint, Twin.Face);
             }
 
             Mesh.InformSplitMidpointEnd(this, midpoint);
@@ -83,18 +87,37 @@ namespace GeometrySharp.HalfEdgeGeometry
         /// </summary>
         public void Merge()
         {
-            if (Face != Next.Face || Twin.Face != Next.Twin.Face)
-                throw new InvalidOperationException("Cannot merge edges unless they are both bordering the same face and the twins both border the same face");
+            if (Next == null)
+                throw new InvalidOperationException("Next must not be null");
+            if (Face == null)
+                throw new InvalidOperationException("Face must not be null");
+            if (Face != Next.Face)
+                throw new InvalidOperationException("Cannot merge two edges bordering different faces");
+            if (Twin.Face != null && Twin.Face != Next.Twin.Face)
+                throw new InvalidOperationException("Cannot merge two edges with twins bordering different faces");
 
-            var oldNext = Next;
-            Next.Face = null;
-            Next.Twin.Face = null;
+            HalfEdge oldNext = Next;
 
-            Next = Next.Next;
-            Next.Next.Twin.Next = Twin;
+            Next = oldNext.Next;
+            End = oldNext.End;
 
-            Face.Edge = this;
+            if (Next.Twin.Next == oldNext.Twin)
+            {
+                Next.Twin.Next = Twin;
+                Next.Twin.End = End;
+            }
+
             if (Twin.Face != null)
+                Twin.Face.Edges.Where(a => a.Next == oldNext.Twin).First().Next = Twin;
+
+            oldNext.Face = null;
+            oldNext.Twin.Face = null;
+            oldNext.Next = null;
+            oldNext.Twin.Next = null;
+
+            if (Face.Edge == oldNext)
+                Face.Edge = this;
+            if (Twin.Face != null && Twin.Face.Edge == oldNext.Twin)
                 Twin.Face.Edge = Twin;
 
             Mesh.Delete(oldNext);

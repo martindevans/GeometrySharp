@@ -73,7 +73,7 @@ namespace GeometrySharp.Procedural
 
         public void Added(Vertex v)
         {
-            changes.Push(new AddVertex(v));
+            //changes.Push(new AddVertex(v));
         }
 
         public void Deleted(Vertex v)
@@ -119,48 +119,50 @@ namespace GeometrySharp.Procedural
         private class AddVertex
             :Change
         {
-            public readonly Vertex Vertex;
+            public readonly Vector3 Position;
 
             public AddVertex(Vertex v)
             {
-                Vertex = v;
+                Position = v.Position;
             }
 
             public override void Undo(Mesh mesh, Stack<Change> changes)
             {
-                Vertex.Delete();
+                //Vertex.Delete();
             }
         }
 
         private class AddHalfEdge
             :Change
         {
-            public readonly HalfEdge HalfEdge;
+            public readonly Vector3 Start;
+            public readonly Vector3 End;
 
             public AddHalfEdge(HalfEdge h)
             {
-                HalfEdge = h;
+                Start = h.Twin.End.Position;
+                End = h.End.Position;
             }
 
             public override void Undo(Mesh mesh, Stack<Change> changes)
             {
-                HalfEdge.Delete();
+                mesh.GetEdge(mesh.GetVertex(Start), mesh.GetVertex(End)).Delete();
             }
         }
 
         private class AddFace
             : Change
         {
-            public readonly Face Face;
+            public readonly Vertex[] Border;
 
             public AddFace(Face f)
             {
-                Face = f;
+                Border = f.Vertices.ToArray();
             }
 
             public override void Undo(Mesh mesh, Stack<Change> changes)
             {
-                Face.Delete();
+                mesh.GetFace(Border).Delete();
             }
         }
 
@@ -176,7 +178,7 @@ namespace GeometrySharp.Procedural
 
             public override void Undo(Mesh mesh, Stack<Change> changes)
             {
-                mesh.GetFace(Border.Select(a => mesh.GetVertex(a)));
+                var f = mesh.GetFace(Border.Select(a => mesh.GetVertex(a)));
             }
         }
 
@@ -234,12 +236,12 @@ namespace GeometrySharp.Procedural
         {
             public BeginSplitMidpointHalfEdge(HalfEdge e, Vertex m)
             {
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
             }
 
             public override void Undo(Mesh mesh, Stack<Change> changes)
             {
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
             }
         }
 
@@ -248,12 +250,18 @@ namespace GeometrySharp.Procedural
         {
             public EndSplitMidpointHalfEdge(HalfEdge e, Vertex m)
             {
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
             }
 
             public override void Undo(Mesh mesh, Stack<Change> changes)
             {
-                throw new NotImplementedException();
+                AddHalfEdge h = (AddHalfEdge)changes.Pop();
+                BeginSplitMidpointHalfEdge b = (BeginSplitMidpointHalfEdge)changes.Pop();
+
+                mesh.GetEdge(mesh.GetVertex(h.Start), mesh.GetVertex(h.End), false).Merge();
+
+                mesh.CleanEdges();
+                mesh.CleanVertices();
             }
         }
     }

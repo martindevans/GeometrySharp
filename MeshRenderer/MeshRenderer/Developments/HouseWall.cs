@@ -36,7 +36,7 @@ namespace MeshRenderer.Developments
             if (edges.Count != 2)
                 throw new InvalidOperationException("Not 2 edges");
 
-            int splits = 4;
+            int splits = 2;
             foreach (var edge in edges)
             {
                 var dir = edge.End.Position - edge.Twin.End.Position;
@@ -52,7 +52,11 @@ namespace MeshRenderer.Developments
             f.Delete();
 
             for (int i = 0; i < vertices.Length / 2 - 1; i++)
+            {
                 yield return (ProceduralFace)Mesh.GetFace(vertices[i], vertices[i + 1], vertices[vertices.Length - 2 - i], vertices[vertices.Length - 1 - i]);
+            }
+
+            //return new List<ProceduralFace>();
         }
     }
 }
